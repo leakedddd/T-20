@@ -2,4 +2,29 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- Primary colors -->
+    <color name="primary">#FF6200EE</color>
+    <color name="primary_dark">#FF3700B3</color>
+    <color name="primary_variant">#FF9E47FF</color>
+
+    <!-- Secondary colors -->
+    <color name="secondary">#FF03DAC6</color>
+    <color name="secondary_variant">#FF018786</color>
+
+    <!-- Background -->
+    <color name="background">#FFF5F5F5</color>
+    <color name="surface">#FFFFFFFF</color>
+
+    <!-- Text -->
+    <color name="text_primary">#FF212121</color>
+    <color name="text_secondary">#FF757575</color>
+
+    <!-- Navigation -->
+    <color name="nav_selected">#FF6200EE</color>
+    <color name="nav_unselected">#FF9E9E9E</color>
+
+    <!-- Product card -->
+    <color name="card_background">#FFFFFFFF</color>
+    <color name="price_color">#FFFF5722</color>
 </resources>
