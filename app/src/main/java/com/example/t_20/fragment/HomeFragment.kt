@@ -39,9 +39,9 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setupCategories()
         setupProductsGrid()
         loadSampleProducts()
+        setupCategories()
     }
 
     private fun setupCategories() {
