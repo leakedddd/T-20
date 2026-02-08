@@ -1,8 +1,6 @@
 package com.example.t_20.adapter
 
-import android.graphics.Paint
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.t_20.databinding.ItemProductBinding
@@ -21,15 +19,10 @@ class ProductAdapter(
             binding.apply {
                 imgProduct.setImageResource(product.imageRes)
                 txtProductName.text = product.name
-                txtProductPrice.text = String.format(Locale.US, "$%.2f", product.price)
+                txtProductPrice.text = String.format(Locale.US, "%.2f", product.price)
 
-                if (product.originalPrice != null && product.originalPrice > product.price) {
-                    txtProductOriginalPrice.visibility = View.VISIBLE
-                    txtProductOriginalPrice.text = String.format(Locale.US, "$%.2f", product.originalPrice)
-                    txtProductOriginalPrice.paintFlags =
-                        txtProductOriginalPrice.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
-                } else {
-                    txtProductOriginalPrice.visibility = View.GONE
+                btnAddCart.setOnClickListener {
+                    // TODO: Add to cart functionality
                 }
             }
         }

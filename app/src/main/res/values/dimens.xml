@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Chip dimensions -->
+    <dimen name="chip_stroke_width">1dp</dimen>
+    <dimen name="chip_corner_radius">20dp</dimen>
+
+    <!-- Product card -->
+    <dimen name="product_image_height">160dp</dimen>
+    <dimen name="product_card_margin">6dp</dimen>
+    <dimen name="product_card_padding">12dp</dimen>
+
+    <!-- Spacing -->
+    <dimen name="spacing_small">8dp</dimen>
+    <dimen name="spacing_medium">16dp</dimen>
+    <dimen name="spacing_large">24dp</dimen>
+</resources>

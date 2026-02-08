@@ -5,41 +5,59 @@
     android:layout_height="match_parent"
     android:background="@color/background">
 
+    <!-- Title -->
     <TextView
-        android:id="@+id/txt_cart_title"
+        android:id="@+id/txt_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="24dp"
+        android:fontFamily="serif"
         android:text="@string/cart_title"
         android:textColor="@color/text_primary"
-        android:textSize="24sp"
-        android:textStyle="bold"
+        android:textSize="28sp"
+        android:textStyle="bold|italic"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <!-- Empty Cart Icon -->
     <ImageView
         android:id="@+id/img_empty_cart"
-        android:layout_width="120dp"
-        android:layout_height="120dp"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
         android:contentDescription="@string/cart_empty"
         android:src="@drawable/ic_cart"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:tint="@color/nav_unselected" />
+        app:tint="@color/chip_stroke" />
 
+    <!-- Empty Message -->
     <TextView
         android:id="@+id/txt_empty_cart"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:text="@string/cart_empty"
-        android:textColor="@color/text_secondary"
-        android:textSize="16sp"
+        android:textColor="@color/text_primary"
+        android:textSize="18sp"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/img_empty_cart" />
+
+    <!-- Empty Sub Message -->
+    <TextView
+        android:id="@+id/txt_empty_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/cart_empty_message"
+        android:textColor="@color/text_secondary"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/txt_empty_cart" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

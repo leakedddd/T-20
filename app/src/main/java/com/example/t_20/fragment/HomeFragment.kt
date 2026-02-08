@@ -10,7 +10,7 @@ import com.example.t_20.R
 import com.example.t_20.adapter.ProductAdapter
 import com.example.t_20.databinding.FragmentHomeBinding
 import com.example.t_20.model.Product
-import com.google.android.material.tabs.TabLayout
+import com.google.android.material.chip.Chip
 
 class HomeFragment : Fragment() {
 
@@ -20,7 +20,13 @@ class HomeFragment : Fragment() {
     private lateinit var productAdapter: ProductAdapter
     private var allProducts: List<Product> = emptyList()
 
-    private val categories = listOf("All", "Women", "Men", "Kids", "Accessories")
+    private val categories = listOf(
+        "Accesorios" to "accesorios",
+        "Camisas" to "camisas",
+        "Pantalones" to "pantalones",
+        "Poleras" to "poleras",
+        "Polos" to "polos"
+    )
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -39,21 +45,32 @@ class HomeFragment : Fragment() {
     }
 
     private fun setupCategories() {
-        categories.forEach { category ->
-            binding.tabCategories.addTab(
-                binding.tabCategories.newTab().setText(category)
-            )
+        categories.forEachIndexed { index, (displayName, categoryId) ->
+            val chip = Chip(requireContext()).apply {
+                text = displayName
+                tag = categoryId
+                isCheckable = true
+                isChecked = index == 0
+                setChipBackgroundColorResource(R.color.chip_bg_selector)
+                setTextColor(resources.getColorStateList(R.color.chip_text_selector, null))
+                chipStrokeColor = resources.getColorStateList(R.color.chip_stroke, null)
+                chipStrokeWidth = resources.getDimension(R.dimen.chip_stroke_width)
+                chipCornerRadius = resources.getDimension(R.dimen.chip_corner_radius)
+                setEnsureMinTouchTargetSize(false)
+            }
+            binding.chipGroupCategories.addView(chip)
         }
 
-        binding.tabCategories.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
-            override fun onTabSelected(tab: TabLayout.Tab?) {
-                val category = tab?.text?.toString() ?: "All"
-                filterProducts(category)
+        binding.chipGroupCategories.setOnCheckedStateChangeListener { group, checkedIds ->
+            if (checkedIds.isNotEmpty()) {
+                val selectedChip = group.findViewById<Chip>(checkedIds.first())
+                val categoryId = selectedChip?.tag as? String ?: "accesorios"
+                filterProducts(categoryId)
             }
+        }
 
-            override fun onTabUnselected(tab: TabLayout.Tab?) {}
-            override fun onTabReselected(tab: TabLayout.Tab?) {}
-        })
+        // Initial filter
+        filterProducts("accesorios")
     }
 
     private fun setupProductsGrid() {
@@ -66,28 +83,40 @@ class HomeFragment : Fragment() {
 
     private fun loadSampleProducts() {
         allProducts = listOf(
-            Product(1, "Elegant Summer Dress", 29.99, 49.99, R.drawable.ic_launcher_background, "Women"),
-            Product(2, "Classic Denim Jacket", 45.99, 79.99, R.drawable.ic_launcher_background, "Women"),
-            Product(3, "Casual Cotton T-Shirt", 15.99, 24.99, R.drawable.ic_launcher_background, "Men"),
-            Product(4, "Slim Fit Jeans", 39.99, 59.99, R.drawable.ic_launcher_background, "Men"),
-            Product(5, "Kids Cartoon Hoodie", 22.99, 34.99, R.drawable.ic_launcher_background, "Kids"),
-            Product(6, "Children's Sneakers", 28.99, 44.99, R.drawable.ic_launcher_background, "Kids"),
-            Product(7, "Leather Handbag", 55.99, 89.99, R.drawable.ic_launcher_background, "Accessories"),
-            Product(8, "Fashion Sunglasses", 18.99, 29.99, R.drawable.ic_launcher_background, "Accessories"),
-            Product(9, "Floral Maxi Skirt", 32.99, 54.99, R.drawable.ic_launcher_background, "Women"),
-            Product(10, "Men's Polo Shirt", 24.99, 39.99, R.drawable.ic_launcher_background, "Men"),
-            Product(11, "Kids Pajama Set", 19.99, 29.99, R.drawable.ic_launcher_background, "Kids"),
-            Product(12, "Silver Necklace", 35.99, 59.99, R.drawable.ic_launcher_background, "Accessories")
+            // Accesorios
+            Product(1, "Black Ring", 99.00, null, R.drawable.ic_launcher_background, "accesorios"),
+            Product(2, "Mate Bracelet", 24.99, null, R.drawable.ic_launcher_background, "accesorios"),
+            Product(3, "Military Necklace", 69.99, null, R.drawable.ic_launcher_background, "accesorios"),
+            Product(4, "Necklace", 55.75, null, R.drawable.ic_launcher_background, "accesorios"),
+
+            // Camisas
+            Product(5, "Camisa Casual", 45.99, null, R.drawable.ic_launcher_background, "camisas"),
+            Product(6, "Camisa Formal", 59.99, null, R.drawable.ic_launcher_background, "camisas"),
+            Product(7, "Camisa Manga Corta", 35.50, null, R.drawable.ic_launcher_background, "camisas"),
+            Product(8, "Camisa Estampada", 42.00, null, R.drawable.ic_launcher_background, "camisas"),
+
+            // Pantalones
+            Product(9, "Jean Clásico", 79.99, null, R.drawable.ic_launcher_background, "pantalones"),
+            Product(10, "Pantalón Formal", 89.99, null, R.drawable.ic_launcher_background, "pantalones"),
+            Product(11, "Jogger Deportivo", 55.00, null, R.drawable.ic_launcher_background, "pantalones"),
+            Product(12, "Short Casual", 39.99, null, R.drawable.ic_launcher_background, "pantalones"),
+
+            // Poleras
+            Product(13, "Polera Básica", 25.99, null, R.drawable.ic_launcher_background, "poleras"),
+            Product(14, "Polera Estampada", 32.99, null, R.drawable.ic_launcher_background, "poleras"),
+            Product(15, "Polera Oversize", 38.50, null, R.drawable.ic_launcher_background, "poleras"),
+            Product(16, "Polera Deportiva", 29.99, null, R.drawable.ic_launcher_background, "poleras"),
+
+            // Polos
+            Product(17, "Polo Clásico", 49.99, null, R.drawable.ic_launcher_background, "polos"),
+            Product(18, "Polo Deportivo", 45.00, null, R.drawable.ic_launcher_background, "polos"),
+            Product(19, "Polo Slim Fit", 52.99, null, R.drawable.ic_launcher_background, "polos"),
+            Product(20, "Polo Casual", 47.50, null, R.drawable.ic_launcher_background, "polos")
         )
-        productAdapter.updateProducts(allProducts)
     }
 
-    private fun filterProducts(category: String) {
-        val filteredProducts = if (category == "All") {
-            allProducts
-        } else {
-            allProducts.filter { it.category == category }
-        }
+    private fun filterProducts(categoryId: String) {
+        val filteredProducts = allProducts.filter { it.category == categoryId }
         productAdapter.updateProducts(filteredProducts)
     }
 

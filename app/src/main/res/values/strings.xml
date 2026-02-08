@@ -1,22 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">T-20</string>
 
     <!-- Navigation -->
-    <string name="nav_home">Home</string>
-    <string name="nav_you">You</string>
-    <string name="nav_cart">Cart</string>
+    <string name="nav_home">Inicio</string>
+    <string name="nav_you">Cuenta</string>
+    <string name="nav_cart">Carrito</string>
+
+    <!-- Shop -->
+    <string name="shop_title">Nuestros Productos</string>
 
     <!-- Categories -->
-    <string name="category_all">All</string>
-    <string name="category_women">Women</string>
-    <string name="category_men">Men</string>
-    <string name="category_kids">Kids</string>
-    <string name="category_accessories">Accessories</string>
+    <string name="category_accessories">Accesorios</string>
+    <string name="category_shirts">Camisas</string>
+    <string name="category_pants">Pantalones</string>
+    <string name="category_tshirts">Poleras</string>
+    <string name="category_polos">Polos</string>
 
-    <!-- Placeholders -->
-    <string name="product_price">$%1$.2f</string>
-    <string name="account_title">My Account</string>
-    <string name="cart_title">Shopping Cart</string>
-    <string name="cart_empty">Your cart is empty</string>
-    <string name="account_login">Login / Sign Up</string>
+    <!-- Account -->
+    <string name="account_title">Mi Cuenta</string>
+    <string name="account_login">Iniciar Sesión</string>
+    <string name="account_guest">Invitado</string>
+    <string name="account_guest_message">Inicia sesión para ver tu información</string>
+
+    <!-- Cart -->
+    <string name="cart_title">Carrito</string>
+    <string name="cart_empty">Tu carrito está vacío</string>
+    <string name="cart_empty_message">Agrega productos para comenzar</string>
+
+    <!-- Product -->
+    <string name="product_image_desc">Imagen del producto</string>
 </resources>

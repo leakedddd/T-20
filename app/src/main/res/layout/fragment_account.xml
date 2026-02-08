@@ -5,42 +5,80 @@
     android:layout_height="match_parent"
     android:background="@color/background">
 
-    <ImageView
+    <!-- Title -->
+    <TextView
+        android:id="@+id/txt_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:fontFamily="serif"
+        android:text="@string/account_title"
+        android:textColor="@color/text_primary"
+        android:textSize="28sp"
+        android:textStyle="bold|italic"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Avatar -->
+    <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/img_avatar"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:layout_marginTop="48dp"
-        android:background="@drawable/circle_background"
-        android:contentDescription="@string/nav_you"
-        android:padding="24dp"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_marginTop="40dp"
+        android:background="@color/chip_stroke"
+        android:padding="30dp"
         android:src="@drawable/ic_person"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:tint="@color/primary" />
+        app:layout_constraintTop_toBottomOf="@id/txt_title"
+        app:shapeAppearanceOverlay="@style/CircleImageStyle"
+        app:tint="@color/text_secondary" />
 
+    <!-- Guest Name -->
     <TextView
-        android:id="@+id/txt_account_title"
+        android:id="@+id/txt_user_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="@string/account_title"
+        android:layout_marginTop="20dp"
+        android:text="@string/account_guest"
         android:textColor="@color/text_primary"
-        android:textSize="24sp"
+        android:textSize="22sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/img_avatar" />
 
+    <!-- Guest Message -->
+    <TextView
+        android:id="@+id/txt_guest_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/account_guest_message"
+        android:textColor="@color/text_secondary"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/txt_user_name" />
+
+    <!-- Login Button -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_login"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:paddingHorizontal="32dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="32dp"
+        android:paddingHorizontal="40dp"
         android:text="@string/account_login"
+        android:textColor="@color/white"
+        app:backgroundTint="@color/primary"
+        app:cornerRadius="6dp"
+        app:icon="@drawable/ic_person"
+        app:iconGravity="textStart"
+        app:iconPadding="8dp"
+        app:iconTint="@color/white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/txt_account_title" />
+        app:layout_constraintTop_toBottomOf="@id/txt_guest_message" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
