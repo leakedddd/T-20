@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import com.example.t_20.databinding.ActivityMainBinding
 import com.example.t_20.fragment.AccountFragment
 import com.example.t_20.fragment.CartFragment
+import com.example.t_20.fragment.FaqFragment
 import com.example.t_20.fragment.HomeFragment
 
 class MainActivity : AppCompatActivity() {
@@ -16,6 +17,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
 
     private val homeFragment = HomeFragment()
+    private val faqFragment = FaqFragment()
     private val accountFragment = AccountFragment()
     private val cartFragment = CartFragment()
 
@@ -44,6 +46,10 @@ class MainActivity : AppCompatActivity() {
             when (item.itemId) {
                 R.id.nav_home -> {
                     loadFragment(homeFragment)
+                    true
+                }
+                R.id.nav_faq -> {
+                    loadFragment(faqFragment)
                     true
                 }
                 R.id.nav_account -> {

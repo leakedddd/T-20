@@ -6,6 +6,7 @@
     <string name="nav_home">Inicio</string>
     <string name="nav_you">Cuenta</string>
     <string name="nav_cart">Carrito</string>
+    <string name="nav_help">Ayuda</string>
 
     <!-- Shop -->
     <string name="shop_title">Nuestros Productos</string>
@@ -27,6 +28,9 @@
     <string name="cart_title">Carrito</string>
     <string name="cart_empty">Tu carrito está vacío</string>
     <string name="cart_empty_message">Agrega productos para comenzar</string>
+
+    <!-- FAQ -->
+    <string name="faq_title">FAQs</string>
 
     <!-- Product -->
     <string name="product_image_desc">Imagen del producto</string>
