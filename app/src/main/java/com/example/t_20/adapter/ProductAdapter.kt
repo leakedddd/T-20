@@ -8,7 +8,8 @@ import com.example.t_20.model.Product
 import java.util.Locale
 
 class ProductAdapter(
-    private var products: List<Product> = emptyList()
+    private var products: List<Product> = emptyList(),
+    private val onAddToCart: (Product) -> Unit = {}
 ) : RecyclerView.Adapter<ProductAdapter.ProductViewHolder>() {
 
     inner class ProductViewHolder(
@@ -22,7 +23,7 @@ class ProductAdapter(
                 txtProductPrice.text = String.format(Locale.US, "%.2f", product.price)
 
                 btnAddCart.setOnClickListener {
-                    // TODO: Add to cart functionality
+                    onAddToCart(product)
                 }
             }
         }

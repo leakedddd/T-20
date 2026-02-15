@@ -1,16 +1,19 @@
 package com.example.t_20.fragment
 
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.t_20.R
 import com.example.t_20.adapter.ProductAdapter
 import com.example.t_20.data.AppDatabase
 import com.example.t_20.databinding.FragmentHomeBinding
-import com.example.t_20.model.Product
+import com.example.t_20.model.CartItem
 import com.google.android.material.chip.Chip
 import java.util.concurrent.Executors
 
@@ -21,6 +24,9 @@ class HomeFragment : Fragment() {
 
     private lateinit var productAdapter: ProductAdapter
     private lateinit var db: AppDatabase
+
+    private var currentCategory = "accesorios"
+    private var currentQuery = ""
 
     private val categories = listOf(
         "Accesorios" to "accesorios",
@@ -44,6 +50,18 @@ class HomeFragment : Fragment() {
         db = AppDatabase.getInstance(requireContext())
         setupProductsGrid()
         setupCategories()
+        setupSearch()
+    }
+
+    private fun setupSearch() {
+        binding.editSearch.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) {
+                currentQuery = s?.toString()?.trim() ?: ""
+                filterProducts(currentCategory)
+            }
+        })
     }
 
     private fun setupCategories() {
@@ -67,16 +85,39 @@ class HomeFragment : Fragment() {
             if (checkedIds.isNotEmpty()) {
                 val selectedChip = group.findViewById<Chip>(checkedIds.first())
                 val categoryId = selectedChip?.tag as? String ?: "accesorios"
+                currentCategory = categoryId
                 filterProducts(categoryId)
             }
         }
 
-        // Initial load
         filterProducts("accesorios")
     }
 
     private fun setupProductsGrid() {
-        productAdapter = ProductAdapter()
+        productAdapter = ProductAdapter { product ->
+            Executors.newSingleThreadExecutor().execute {
+                val cartItem = db.cartDao().getCartItem(product.id)
+                val currentQty = cartItem?.quantity ?: 0
+                if (currentQty >= product.stock) {
+                    activity?.runOnUiThread {
+                        Toast.makeText(
+                            requireContext(),
+                            getString(R.string.stock_error, product.stock),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                } else {
+                    db.cartDao().insert(CartItem(productId = product.id, quantity = currentQty + 1))
+                    activity?.runOnUiThread {
+                        Toast.makeText(
+                            requireContext(),
+                            getString(R.string.added_to_cart),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            }
+        }
         binding.recyclerProducts.apply {
             layoutManager = GridLayoutManager(requireContext(), 2)
             adapter = productAdapter
@@ -85,7 +126,11 @@ class HomeFragment : Fragment() {
 
     private fun filterProducts(categoryId: String) {
         Executors.newSingleThreadExecutor().execute {
-            val products = db.productDao().getByCategory(categoryId)
+            val products = if (currentQuery.isEmpty()) {
+                db.productDao().getByCategory(categoryId)
+            } else {
+                db.productDao().searchByCategory(categoryId, currentQuery)
+            }
             activity?.runOnUiThread {
                 productAdapter.updateProducts(products)
             }

@@ -34,4 +34,54 @@
 
     <!-- Product -->
     <string name="product_image_desc">Imagen del producto</string>
+    <string name="search_hint">Buscar productos…</string>
+
+    <!-- Cart Details -->
+    <string name="cart_summary">Resumen del pedido</string>
+    <string name="cart_products">%d producto(s)</string>
+    <string name="cart_subtotal">Subtotal</string>
+    <string name="cart_shipping">Envío</string>
+    <string name="cart_shipping_free">Gratis</string>
+    <string name="cart_total">Total</string>
+    <string name="cart_pay">IR A PAGAR</string>
+    <string name="cart_remove">Eliminar</string>
+    <string name="stock_error">Solo hay %d unidades disponibles</string>
+    <string name="added_to_cart">Producto agregado al carrito</string>
+
+    <!-- Login -->
+    <string name="login_title">Iniciar Sesión</string>
+    <string name="login_email">Correo electrónico</string>
+    <string name="login_password">Contraseña</string>
+    <string name="login_button">INICIAR SESIÓN</string>
+    <string name="login_register">¿No tienes cuenta? Regístrate</string>
+    <string name="login_error">Correo o contraseña incorrectos</string>
+    <string name="login_required">Debes iniciar sesión para comprar</string>
+
+    <!-- Register -->
+    <string name="register_title">Crear Cuenta</string>
+    <string name="register_name">Nombre completo</string>
+    <string name="register_email">Correo electrónico</string>
+    <string name="register_password">Contraseña</string>
+    <string name="register_button">REGISTRARSE</string>
+    <string name="register_login">¿Ya tienes cuenta? Inicia sesión</string>
+    <string name="register_error_exists">Ya existe una cuenta con ese correo</string>
+    <string name="register_error_empty">Todos los campos son obligatorios</string>
+    <string name="register_success">Cuenta creada exitosamente</string>
+
+    <!-- Checkout -->
+    <string name="checkout_title">Pagar</string>
+    <string name="checkout_address">Dirección de envío</string>
+    <string name="checkout_address_hint">Ingresa tu dirección</string>
+    <string name="checkout_payment">Método de pago</string>
+    <string name="checkout_card_number">Número de tarjeta</string>
+    <string name="checkout_card_name">Nombre en la tarjeta</string>
+    <string name="checkout_card_expiry">MM/AA</string>
+    <string name="checkout_card_cvv">CVV</string>
+    <string name="checkout_confirm">CONFIRMAR PEDIDO</string>
+    <string name="checkout_success">¡Pedido confirmado! Gracias por tu compra.</string>
+    <string name="checkout_items">%d artículo(s) — $%.2f</string>
+
+    <!-- Account logged in -->
+    <string name="account_logout">Cerrar Sesión</string>
+    <string name="account_welcome">Bienvenido/a</string>
 </resources>

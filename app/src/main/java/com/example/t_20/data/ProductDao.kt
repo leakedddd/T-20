@@ -14,6 +14,15 @@ interface ProductDao {
     @Query("SELECT * FROM products WHERE category = :category")
     fun getByCategory(category: String): List<Product>
 
+    @Query("SELECT * FROM products WHERE category = :category AND name LIKE '%' || :query || '%'")
+    fun searchByCategory(category: String, query: String): List<Product>
+
+    @Query("SELECT * FROM products WHERE name LIKE '%' || :query || '%'")
+    fun search(query: String): List<Product>
+
+    @Query("SELECT * FROM products WHERE id = :id")
+    fun getById(id: Int): Product?
+
     @Query("SELECT DISTINCT category FROM products ORDER BY category")
     fun getCategories(): List<String>
 
