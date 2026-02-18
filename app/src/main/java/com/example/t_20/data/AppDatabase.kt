@@ -11,7 +11,7 @@ import com.example.t_20.model.Product
 import com.example.t_20.model.User
 import java.util.concurrent.Executors
 
-@Database(entities = [Product::class, CartItem::class, User::class], version = 2)
+@Database(entities = [Product::class, CartItem::class, User::class], version = 3)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun productDao(): ProductDao
