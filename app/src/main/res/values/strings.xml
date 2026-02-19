@@ -84,4 +84,12 @@
     <!-- Account logged in -->
     <string name="account_logout">Cerrar Sesión</string>
     <string name="account_welcome">Bienvenido/a</string>
+
+    <!-- Order History -->
+    <string name="order_history">Historial de Pedidos</string>
+    <string name="order_number">Pedido #%d</string>
+    <string name="order_date">%s</string>
+    <string name="order_items_count">%d artículo(s)</string>
+    <string name="order_no_history">No tienes pedidos aún</string>
+    <string name="order_status_confirmed">Confirmado</string>
 </resources>

@@ -7,14 +7,20 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.t_20.LoginActivity
-import com.example.t_20.R
+import com.example.t_20.adapter.OrderAdapter
+import com.example.t_20.data.AppDatabase
 import com.example.t_20.databinding.FragmentAccountBinding
+import java.util.concurrent.Executors
 
 class AccountFragment : Fragment() {
 
     private var _binding: FragmentAccountBinding? = null
     private val binding get() = _binding!!
+
+    private lateinit var db: AppDatabase
+    private lateinit var orderAdapter: OrderAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -27,15 +33,22 @@ class AccountFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        db = AppDatabase.getInstance(requireContext())
+
+        orderAdapter = OrderAdapter()
+        binding.recyclerOrders.apply {
+            layoutManager = LinearLayoutManager(requireContext())
+            adapter = orderAdapter
+        }
+
         binding.btnLogin.setOnClickListener {
+            startActivity(Intent(requireContext(), LoginActivity::class.java))
+        }
+
+        binding.btnLogout.setOnClickListener {
             val prefs = requireContext().getSharedPreferences("t20_prefs", Context.MODE_PRIVATE)
-            val userId = prefs.getInt("user_id", -1)
-            if (userId != -1) {
-                prefs.edit().clear().apply()
-                updateUI()
-            } else {
-                startActivity(Intent(requireContext(), LoginActivity::class.java))
-            }
+            prefs.edit().clear().apply()
+            updateUI()
         }
     }
 
@@ -51,15 +64,34 @@ class AccountFragment : Fragment() {
         val userEmail = prefs.getString("user_email", null)
 
         if (userId != -1 && userName != null) {
+            // Logged in
+            binding.layoutGuest.visibility = View.GONE
+            binding.layoutLoggedIn.visibility = View.VISIBLE
             binding.txtUserName.text = userName
-            binding.txtGuestMessage.text = userEmail ?: ""
-            binding.btnLogin.text = getString(R.string.account_logout)
-            binding.btnLogin.setIconResource(0)
+            binding.txtUserEmail.text = userEmail ?: ""
+
+            // Load orders
+            loadOrders(userId)
         } else {
-            binding.txtUserName.text = getString(R.string.account_guest)
-            binding.txtGuestMessage.text = getString(R.string.account_guest_message)
-            binding.btnLogin.text = getString(R.string.account_login)
-            binding.btnLogin.setIconResource(R.drawable.ic_person)
+            // Guest
+            binding.layoutGuest.visibility = View.VISIBLE
+            binding.layoutLoggedIn.visibility = View.GONE
+        }
+    }
+
+    private fun loadOrders(userId: Int) {
+        Executors.newSingleThreadExecutor().execute {
+            val orders = db.orderDao().getOrdersByUser(userId)
+            activity?.runOnUiThread {
+                if (orders.isEmpty()) {
+                    binding.txtNoOrders.visibility = View.VISIBLE
+                    binding.recyclerOrders.visibility = View.GONE
+                } else {
+                    binding.txtNoOrders.visibility = View.GONE
+                    binding.recyclerOrders.visibility = View.VISIBLE
+                    orderAdapter.updateOrders(orders)
+                }
+            }
         }
     }
 

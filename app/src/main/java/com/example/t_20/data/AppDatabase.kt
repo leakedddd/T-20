@@ -7,16 +7,19 @@ import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.t_20.R
 import com.example.t_20.model.CartItem
+import com.example.t_20.model.Order
+import com.example.t_20.model.OrderItem
 import com.example.t_20.model.Product
 import com.example.t_20.model.User
 import java.util.concurrent.Executors
 
-@Database(entities = [Product::class, CartItem::class, User::class], version = 2)
+@Database(entities = [Product::class, CartItem::class, User::class, Order::class, OrderItem::class], version = 3)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun productDao(): ProductDao
     abstract fun cartDao(): CartDao
     abstract fun userDao(): UserDao
+    abstract fun orderDao(): OrderDao
 
     companion object {
         @Volatile
