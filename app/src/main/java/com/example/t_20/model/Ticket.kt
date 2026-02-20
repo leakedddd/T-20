@@ -7,6 +7,7 @@ import androidx.room.PrimaryKey
 data class Ticket(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
+    val userId: Int,
     val motivo: String,
     val descripcion: String,
     val imagePath: String,

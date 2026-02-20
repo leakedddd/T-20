@@ -1,5 +1,6 @@
 package com.example.t_20
 
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
@@ -22,6 +23,7 @@ class CreateTicketActivity : AppCompatActivity() {
     private lateinit var db: AppDatabase
 
     private var selectedImageUri: Uri? = null
+    private var userId: Int = -1
 
     private val motivos = listOf(
         "Selecciona un motivo",
@@ -59,6 +61,17 @@ class CreateTicketActivity : AppCompatActivity() {
                 systemBars.bottom + 24
             )
             insets
+        }
+
+        // Check if user is logged in
+        val prefs = getSharedPreferences("user_session", MODE_PRIVATE)
+        userId = prefs.getInt("user_id", -1)
+
+        if (userId == -1) {
+            Toast.makeText(this, getString(R.string.ticket_login_required), Toast.LENGTH_SHORT).show()
+            startActivity(Intent(this, LoginActivity::class.java))
+            finish()
+            return
         }
 
         db = AppDatabase.getInstance(this)
@@ -112,6 +125,7 @@ class CreateTicketActivity : AppCompatActivity() {
         Executors.newSingleThreadExecutor().execute {
             try {
                 val ticket = Ticket(
+                    userId = userId,
                     motivo = motivo,
                     descripcion = descripcion,
                     imagePath = selectedImageUri.toString()

@@ -114,4 +114,5 @@
     <string name="ticket_success_title">¡Ticket Creado!</string>
     <string name="ticket_success_message">Ticket #%d creado con éxito.\n\nEspere de 24 a 48 horas para una respuesta.</string>
     <string name="ticket_success_ok">Aceptar</string>
+    <string name="ticket_login_required">Debes iniciar sesión para crear un ticket</string>
 </resources>
