@@ -64,7 +64,7 @@ class CreateTicketActivity : AppCompatActivity() {
         }
 
         // Check if user is logged in
-        val prefs = getSharedPreferences("user_session", MODE_PRIVATE)
+        val prefs = getSharedPreferences("t20_prefs", MODE_PRIVATE)
         userId = prefs.getInt("user_id", -1)
 
         if (userId == -1) {
