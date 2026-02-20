@@ -92,4 +92,26 @@
     <string name="order_items_count">%d artículo(s)</string>
     <string name="order_no_history">No tienes pedidos aún</string>
     <string name="order_status_confirmed">Confirmado</string>
+
+    <!-- Support Ticket -->
+    <string name="need_more_help">¿Necesitas más ayuda?</string>
+    <string name="create_ticket_subtitle">Crea un ticket de soporte</string>
+    <string name="create_ticket">Crear ticket</string>
+    <string name="ticket_title">Crear Ticket</string>
+    <string name="ticket_subtitle">Describe tu problema y te ayudaremos</string>
+    <string name="ticket_motivo">Motivo</string>
+    <string name="ticket_image">Evidencia (imagen)</string>
+    <string name="ticket_image_required">* Obligatorio</string>
+    <string name="ticket_tap_upload">Toca para subir imagen</string>
+    <string name="ticket_description">Descripción del problema</string>
+    <string name="ticket_description_hint">Describe detalladamente tu problema…</string>
+    <string name="ticket_upload_first">Debes adjuntar una imagen primero</string>
+    <string name="ticket_submit">ENVIAR SOLICITUD</string>
+    <string name="ticket_error_motivo">Selecciona un motivo</string>
+    <string name="ticket_error_image">Debe adjuntar una imagen para continuar</string>
+    <string name="ticket_error_description">Debe describir el problema</string>
+    <string name="ticket_error_save">No se pudo registrar su ticket. Intente nuevamente</string>
+    <string name="ticket_success_title">¡Ticket Creado!</string>
+    <string name="ticket_success_message">Ticket #%d creado con éxito.\n\nEspere de 24 a 48 horas para una respuesta.</string>
+    <string name="ticket_success_ok">Aceptar</string>
 </resources>

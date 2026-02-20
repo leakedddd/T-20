@@ -10,16 +10,18 @@ import com.example.t_20.model.CartItem
 import com.example.t_20.model.Order
 import com.example.t_20.model.OrderItem
 import com.example.t_20.model.Product
+import com.example.t_20.model.Ticket
 import com.example.t_20.model.User
 import java.util.concurrent.Executors
 
-@Database(entities = [Product::class, CartItem::class, User::class, Order::class, OrderItem::class], version = 3)
+@Database(entities = [Product::class, CartItem::class, User::class, Order::class, OrderItem::class, Ticket::class], version = 4)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun productDao(): ProductDao
     abstract fun cartDao(): CartDao
     abstract fun userDao(): UserDao
     abstract fun orderDao(): OrderDao
+    abstract fun ticketDao(): TicketDao
 
     companion object {
         @Volatile

@@ -1,11 +1,13 @@
 package com.example.t_20.fragment
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.t_20.CreateTicketActivity
 import com.example.t_20.adapter.FaqAdapter
 import com.example.t_20.databinding.FragmentFaqBinding
 import com.example.t_20.model.Faq
@@ -27,6 +29,7 @@ class FaqFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupFaqList()
+        setupCreateTicketButton()
     }
 
     private fun setupFaqList() {
@@ -60,6 +63,12 @@ class FaqFragment : Fragment() {
         binding.recyclerFaq.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = FaqAdapter(faqs)
+        }
+    }
+
+    private fun setupCreateTicketButton() {
+        binding.btnCreateTicket.setOnClickListener {
+            startActivity(Intent(requireContext(), CreateTicketActivity::class.java))
         }
     }
 
