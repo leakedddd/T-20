@@ -93,6 +93,11 @@ class HomeFragment : Fragment() {
         filterProducts("accesorios")
     }
 
+    override fun onResume() {
+        super.onResume()
+        filterProducts(currentCategory)
+    }
+
     private fun setupProductsGrid() {
         productAdapter = ProductAdapter { product ->
             Executors.newSingleThreadExecutor().execute {
