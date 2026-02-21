@@ -72,6 +72,34 @@
 
         </com.google.android.material.card.MaterialCardView>
 
+        <!-- Pedido Spinner -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="@string/ticket_pedido"
+            android:textColor="@color/text_primary"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:cardBackgroundColor="@color/card_background"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="0dp"
+            app:strokeColor="@color/chip_stroke"
+            app:strokeWidth="1dp">
+
+            <Spinner
+                android:id="@+id/spinner_pedido"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:paddingHorizontal="12dp" />
+
+        </com.google.android.material.card.MaterialCardView>
+
         <!-- Image Upload -->
         <TextView
             android:layout_width="wrap_content"

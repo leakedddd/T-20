@@ -25,6 +25,9 @@ class CreateTicketActivity : AppCompatActivity() {
     private var selectedImageUri: Uri? = null
     private var userId: Int = -1
 
+    private val orderIds = mutableListOf<Int>()
+    private val orderLabels = mutableListOf<String>()
+
     private val motivos = listOf(
         "Selecciona un motivo",
         "Pedido dañado",
@@ -76,14 +79,43 @@ class CreateTicketActivity : AppCompatActivity() {
 
         db = AppDatabase.getInstance(this)
 
-        setupSpinner()
+        setupMotivoSpinner()
+        loadOrders()
         setupListeners()
     }
 
-    private fun setupSpinner() {
+    private fun setupMotivoSpinner() {
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, motivos)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.spinnerMotivo.adapter = adapter
+    }
+
+    private fun loadOrders() {
+        Executors.newSingleThreadExecutor().execute {
+            val orders = db.orderDao().getOrdersByUser(userId)
+
+            runOnUiThread {
+                orderLabels.clear()
+                orderIds.clear()
+
+                orderLabels.add(getString(R.string.ticket_select_order))
+                orderIds.add(-1)
+
+                if (orders.isEmpty()) {
+                    Toast.makeText(this, getString(R.string.ticket_no_orders), Toast.LENGTH_LONG).show()
+                } else {
+                    orders.forEach { orderWithItems ->
+                        val order = orderWithItems.order
+                        orderLabels.add(getString(R.string.ticket_order_item, order.id, order.total))
+                        orderIds.add(order.id)
+                    }
+                }
+
+                val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, orderLabels)
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                binding.spinnerPedido.adapter = adapter
+            }
+        }
     }
 
     private fun setupListeners() {
@@ -100,11 +132,18 @@ class CreateTicketActivity : AppCompatActivity() {
 
     private fun submitTicket() {
         val motivoPosition = binding.spinnerMotivo.selectedItemPosition
+        val pedidoPosition = binding.spinnerPedido.selectedItemPosition
         val descripcion = binding.editDescription.text.toString().trim()
 
         // Validate motivo
         if (motivoPosition == 0) {
             Toast.makeText(this, getString(R.string.ticket_error_motivo), Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Validate order selection
+        if (pedidoPosition == 0 || orderIds.getOrNull(pedidoPosition) == -1) {
+            Toast.makeText(this, getString(R.string.ticket_error_order), Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -121,11 +160,13 @@ class CreateTicketActivity : AppCompatActivity() {
         }
 
         val motivo = motivos[motivoPosition]
+        val orderId = orderIds[pedidoPosition]
 
         Executors.newSingleThreadExecutor().execute {
             try {
                 val ticket = Ticket(
                     userId = userId,
+                    orderId = orderId,
                     motivo = motivo,
                     descripcion = descripcion,
                     imagePath = selectedImageUri.toString()

@@ -100,6 +100,11 @@
     <string name="ticket_title">Crear Ticket</string>
     <string name="ticket_subtitle">Describe tu problema y te ayudaremos</string>
     <string name="ticket_motivo">Motivo</string>
+    <string name="ticket_pedido">Pedido relacionado</string>
+    <string name="ticket_select_order">Selecciona un pedido</string>
+    <string name="ticket_order_item">Pedido #%d - $%.2f</string>
+    <string name="ticket_error_order">Selecciona un pedido</string>
+    <string name="ticket_no_orders">No tienes pedidos registrados</string>
     <string name="ticket_image">Evidencia (imagen)</string>
     <string name="ticket_image_required">* Obligatorio</string>
     <string name="ticket_tap_upload">Toca para subir imagen</string>
