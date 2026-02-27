@@ -104,7 +104,12 @@ class CheckoutActivity : AppCompatActivity() {
                     try {
                         firebaseRepo.saveOrder(userEmail, order.copy(id = orderId.toInt()), orderItems)
                         firebaseRepo.clearCart(userEmail)
-                    } catch (e: Exception) { }
+                        android.util.Log.d("CheckoutActivity", "Order saved to Firebase for $userEmail")
+                    } catch (e: Exception) {
+                        android.util.Log.e("CheckoutActivity", "Firebase error: ${e.message}", e)
+                    }
+                } else {
+                    android.util.Log.e("CheckoutActivity", "userEmail is NULL - cannot save to Firebase")
                 }
 
                 db.cartDao().clearCart()
