@@ -7,15 +7,20 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
 import com.example.t_20.data.AppDatabase
+import com.example.t_20.data.FirebaseRepository
 import com.example.t_20.databinding.ActivityRegisterBinding
 import com.example.t_20.model.User
-import java.util.concurrent.Executors
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class RegisterActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityRegisterBinding
     private lateinit var db: AppDatabase
+    private val firebaseRepo = FirebaseRepository()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,25 +53,31 @@ class RegisterActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            Executors.newSingleThreadExecutor().execute {
-                val existing = db.userDao().getByEmail(email)
-                if (existing != null) {
-                    runOnUiThread {
-                        Toast.makeText(this, getString(R.string.register_error_exists), Toast.LENGTH_SHORT).show()
-                    }
+            lifecycleScope.launch {
+                val existingFirebase = withContext(Dispatchers.IO) {
+                    try { firebaseRepo.getUserByEmail(email) } catch (e: Exception) { null }
+                }
+                val existingLocal = withContext(Dispatchers.IO) { db.userDao().getByEmail(email) }
+
+                if (existingFirebase != null || existingLocal != null) {
+                    Toast.makeText(this@RegisterActivity, getString(R.string.register_error_exists), Toast.LENGTH_SHORT).show()
                 } else {
                     val user = User(name = name, email = email, password = password)
-                    val id = db.userDao().register(user)
-                    runOnUiThread {
-                        Toast.makeText(this, getString(R.string.register_success), Toast.LENGTH_SHORT).show()
-                        val prefs = getSharedPreferences("t20_prefs", MODE_PRIVATE)
-                        prefs.edit()
-                            .putInt("user_id", id.toInt())
-                            .putString("user_name", name)
-                            .putString("user_email", email)
-                            .apply()
-                        finish()
+                    val id = withContext(Dispatchers.IO) { db.userDao().register(user) }
+                    val userWithId = user.copy(id = id.toInt())
+
+                    withContext(Dispatchers.IO) {
+                        try { firebaseRepo.saveUser(userWithId) } catch (e: Exception) { }
                     }
+
+                    Toast.makeText(this@RegisterActivity, getString(R.string.register_success), Toast.LENGTH_SHORT).show()
+                    val prefs = getSharedPreferences("t20_prefs", MODE_PRIVATE)
+                    prefs.edit()
+                        .putInt("user_id", id.toInt())
+                        .putString("user_name", name)
+                        .putString("user_email", email)
+                        .apply()
+                    finish()
                 }
             }
         }

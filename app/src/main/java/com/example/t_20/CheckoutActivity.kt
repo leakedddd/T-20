@@ -6,21 +6,26 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.t_20.adapter.CheckoutAdapter
 import com.example.t_20.data.AppDatabase
+import com.example.t_20.data.FirebaseRepository
 import com.example.t_20.databinding.ActivityCheckoutBinding
 import com.example.t_20.model.CartWithProduct
 import com.example.t_20.model.Order
 import com.example.t_20.model.OrderItem
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.Locale
-import java.util.concurrent.Executors
 
 class CheckoutActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityCheckoutBinding
     private lateinit var db: AppDatabase
     private lateinit var checkoutAdapter: CheckoutAdapter
+    private val firebaseRepo = FirebaseRepository()
 
     private var cartItems: List<CartWithProduct> = emptyList()
     private var totalPrice: Double = 0.0
@@ -68,59 +73,67 @@ class CheckoutActivity : AppCompatActivity() {
     private fun confirmOrder(address: String) {
         val prefs = getSharedPreferences("t20_prefs", MODE_PRIVATE)
         val userId = prefs.getInt("user_id", -1)
+        val userEmail = prefs.getString("user_email", null)
 
         if (userId == -1) {
             Toast.makeText(this, getString(R.string.login_required), Toast.LENGTH_SHORT).show()
             return
         }
 
-        Executors.newSingleThreadExecutor().execute {
-            // Create order
-            val order = Order(
-                userId = userId,
-                total = totalPrice,
-                address = address
-            )
-            val orderId = db.orderDao().insertOrder(order)
-
-            // Create order items
-            val orderItems = cartItems.map { cartWithProduct ->
-                OrderItem(
-                    orderId = orderId.toInt(),
-                    productName = cartWithProduct.product.name,
-                    productPrice = cartWithProduct.product.price,
-                    quantity = cartWithProduct.cartItem.quantity,
-                    productImageRes = cartWithProduct.product.imageRes
+        lifecycleScope.launch {
+            withContext(Dispatchers.IO) {
+                val order = Order(
+                    userId = userId,
+                    total = totalPrice,
+                    address = address
                 )
-            }
-            db.orderDao().insertOrderItems(orderItems)
+                val orderId = db.orderDao().insertOrder(order)
 
-            // Clear cart
-            db.cartDao().clearCart()
+                val orderItems = cartItems.map { cartWithProduct ->
+                    OrderItem(
+                        orderId = orderId.toInt(),
+                        productName = cartWithProduct.product.name,
+                        productPrice = cartWithProduct.product.price,
+                        quantity = cartWithProduct.cartItem.quantity,
+                        productImageRes = cartWithProduct.product.imageRes
+                    )
+                }
+                db.orderDao().insertOrderItems(orderItems)
 
-            runOnUiThread {
-                Toast.makeText(this, getString(R.string.checkout_success), Toast.LENGTH_LONG).show()
-                finish()
+                if (userEmail != null) {
+                    try {
+                        firebaseRepo.saveOrder(userEmail, order.copy(id = orderId.toInt()), orderItems)
+                        firebaseRepo.clearCart(userEmail)
+                    } catch (e: Exception) { }
+                }
+
+                db.cartDao().clearCart()
             }
+
+            Toast.makeText(this@CheckoutActivity, getString(R.string.checkout_success), Toast.LENGTH_LONG).show()
+            finish()
         }
     }
 
     private fun loadCheckoutData() {
-        Executors.newSingleThreadExecutor().execute {
-            cartItems = db.cartDao().getCartWithProducts()
-            val totalItems = db.cartDao().getTotalItems() ?: 0
-            totalPrice = db.cartDao().getTotalPrice() ?: 0.0
-
-            runOnUiThread {
-                checkoutAdapter.updateItems(cartItems)
-                binding.txtCheckoutSummary.text = String.format(
-                    Locale.US,
-                    getString(R.string.checkout_items),
-                    totalItems,
-                    totalPrice
+        lifecycleScope.launch {
+            val (items, totalItems, price) = withContext(Dispatchers.IO) {
+                Triple(
+                    db.cartDao().getCartWithProducts(),
+                    db.cartDao().getTotalItems() ?: 0,
+                    db.cartDao().getTotalPrice() ?: 0.0
                 )
-                binding.txtCheckoutTotal.text = String.format(Locale.US, "$%.2f", totalPrice)
             }
+            cartItems = items
+            totalPrice = price
+            checkoutAdapter.updateItems(cartItems)
+            binding.txtCheckoutSummary.text = String.format(
+                Locale.US,
+                getString(R.string.checkout_items),
+                totalItems,
+                totalPrice
+            )
+            binding.txtCheckoutTotal.text = String.format(Locale.US, "$%.2f", totalPrice)
         }
     }
 }

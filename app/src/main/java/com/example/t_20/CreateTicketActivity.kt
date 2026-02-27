@@ -12,18 +12,24 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
 import com.example.t_20.data.AppDatabase
+import com.example.t_20.data.FirebaseRepository
 import com.example.t_20.databinding.ActivityCreateTicketBinding
 import com.example.t_20.model.Ticket
-import java.util.concurrent.Executors
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class CreateTicketActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityCreateTicketBinding
     private lateinit var db: AppDatabase
+    private val firebaseRepo = FirebaseRepository()
 
     private var selectedImageUri: Uri? = null
     private var userId: Int = -1
+    private var userEmail: String? = null
 
     private val orderIds = mutableListOf<Int>()
     private val orderLabels = mutableListOf<String>()
@@ -69,6 +75,7 @@ class CreateTicketActivity : AppCompatActivity() {
         // Check if user is logged in
         val prefs = getSharedPreferences("t20_prefs", MODE_PRIVATE)
         userId = prefs.getInt("user_id", -1)
+        userEmail = prefs.getString("user_email", null)
 
         if (userId == -1) {
             Toast.makeText(this, getString(R.string.ticket_login_required), Toast.LENGTH_SHORT).show()
@@ -91,30 +98,28 @@ class CreateTicketActivity : AppCompatActivity() {
     }
 
     private fun loadOrders() {
-        Executors.newSingleThreadExecutor().execute {
-            val orders = db.orderDao().getOrdersByUser(userId)
+        lifecycleScope.launch {
+            val orders = withContext(Dispatchers.IO) { db.orderDao().getOrdersByUser(userId) }
 
-            runOnUiThread {
-                orderLabels.clear()
-                orderIds.clear()
+            orderLabels.clear()
+            orderIds.clear()
 
-                orderLabels.add(getString(R.string.ticket_select_order))
-                orderIds.add(-1)
+            orderLabels.add(getString(R.string.ticket_select_order))
+            orderIds.add(-1)
 
-                if (orders.isEmpty()) {
-                    Toast.makeText(this, getString(R.string.ticket_no_orders), Toast.LENGTH_LONG).show()
-                } else {
-                    orders.forEach { orderWithItems ->
-                        val order = orderWithItems.order
-                        orderLabels.add(getString(R.string.ticket_order_item, order.id, order.total))
-                        orderIds.add(order.id)
-                    }
+            if (orders.isEmpty()) {
+                Toast.makeText(this@CreateTicketActivity, getString(R.string.ticket_no_orders), Toast.LENGTH_LONG).show()
+            } else {
+                orders.forEach { orderWithItems ->
+                    val order = orderWithItems.order
+                    orderLabels.add(getString(R.string.ticket_order_item, order.id, order.total))
+                    orderIds.add(order.id)
                 }
-
-                val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, orderLabels)
-                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                binding.spinnerPedido.adapter = adapter
             }
+
+            val adapter = ArrayAdapter(this@CreateTicketActivity, android.R.layout.simple_spinner_item, orderLabels)
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            binding.spinnerPedido.adapter = adapter
         }
     }
 
@@ -162,7 +167,7 @@ class CreateTicketActivity : AppCompatActivity() {
         val motivo = motivos[motivoPosition]
         val orderId = orderIds[pedidoPosition]
 
-        Executors.newSingleThreadExecutor().execute {
+        lifecycleScope.launch {
             try {
                 val ticket = Ticket(
                     userId = userId,
@@ -171,19 +176,21 @@ class CreateTicketActivity : AppCompatActivity() {
                     descripcion = descripcion,
                     imagePath = selectedImageUri.toString()
                 )
-                val ticketId = db.ticketDao().insert(ticket)
+                val ticketId = withContext(Dispatchers.IO) {
+                    val id = db.ticketDao().insert(ticket)
+                    userEmail?.let { email ->
+                        try { firebaseRepo.saveTicket(email, ticket.copy(id = id.toInt())) } catch (e: Exception) { }
+                    }
+                    id
+                }
 
-                runOnUiThread {
-                    showSuccessDialog(ticketId.toInt())
-                }
+                showSuccessDialog(ticketId.toInt())
             } catch (e: Exception) {
-                runOnUiThread {
-                    Toast.makeText(
-                        this,
-                        getString(R.string.ticket_error_save),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
+                Toast.makeText(
+                    this@CreateTicketActivity,
+                    getString(R.string.ticket_error_save),
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
     }

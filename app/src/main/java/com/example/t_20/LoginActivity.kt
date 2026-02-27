@@ -7,14 +7,19 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
 import com.example.t_20.data.AppDatabase
+import com.example.t_20.data.FirebaseRepository
 import com.example.t_20.databinding.ActivityLoginBinding
-import java.util.concurrent.Executors
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityLoginBinding
     private lateinit var db: AppDatabase
+    private val firebaseRepo = FirebaseRepository()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,20 +51,30 @@ class LoginActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            Executors.newSingleThreadExecutor().execute {
-                val user = db.userDao().login(email, password)
-                runOnUiThread {
-                    if (user != null) {
-                        val prefs = getSharedPreferences("t20_prefs", MODE_PRIVATE)
-                        prefs.edit()
-                            .putInt("user_id", user.id)
-                            .putString("user_name", user.name)
-                            .putString("user_email", user.email)
-                            .apply()
-                        finish()
-                    } else {
-                        Toast.makeText(this, getString(R.string.login_error), Toast.LENGTH_SHORT).show()
+            lifecycleScope.launch {
+                var user = withContext(Dispatchers.IO) {
+                    try { firebaseRepo.loginUser(email, password) } catch (e: Exception) { null }
+                }
+
+                if (user == null) {
+                    user = withContext(Dispatchers.IO) { db.userDao().login(email, password) }
+                }
+
+                if (user != null) {
+                    withContext(Dispatchers.IO) {
+                        if (db.userDao().getByEmail(email) == null) {
+                            db.userDao().register(user)
+                        }
                     }
+                    val prefs = getSharedPreferences("t20_prefs", MODE_PRIVATE)
+                    prefs.edit()
+                        .putInt("user_id", user.id)
+                        .putString("user_name", user.name)
+                        .putString("user_email", user.email)
+                        .apply()
+                    finish()
+                } else {
+                    Toast.makeText(this@LoginActivity, getString(R.string.login_error), Toast.LENGTH_SHORT).show()
                 }
             }
         }

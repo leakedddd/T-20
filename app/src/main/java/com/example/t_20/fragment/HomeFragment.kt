@@ -8,14 +8,18 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.t_20.R
 import com.example.t_20.adapter.ProductAdapter
 import com.example.t_20.data.AppDatabase
+import com.example.t_20.data.FirebaseRepository
 import com.example.t_20.databinding.FragmentHomeBinding
 import com.example.t_20.model.CartItem
 import com.google.android.material.chip.Chip
-import java.util.concurrent.Executors
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class HomeFragment : Fragment() {
 
@@ -24,6 +28,7 @@ class HomeFragment : Fragment() {
 
     private lateinit var productAdapter: ProductAdapter
     private lateinit var db: AppDatabase
+    private val firebaseRepo = FirebaseRepository()
 
     private var currentCategory = "accesorios"
     private var currentQuery = ""
@@ -100,26 +105,30 @@ class HomeFragment : Fragment() {
 
     private fun setupProductsGrid() {
         productAdapter = ProductAdapter { product ->
-            Executors.newSingleThreadExecutor().execute {
-                val cartItem = db.cartDao().getCartItem(product.id)
+            viewLifecycleOwner.lifecycleScope.launch {
+                val cartItem = withContext(Dispatchers.IO) { db.cartDao().getCartItem(product.id) }
                 val currentQty = cartItem?.quantity ?: 0
                 if (currentQty >= product.stock) {
-                    activity?.runOnUiThread {
-                        Toast.makeText(
-                            requireContext(),
-                            getString(R.string.stock_error, product.stock),
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
+                    Toast.makeText(
+                        requireContext(),
+                        getString(R.string.stock_error, product.stock),
+                        Toast.LENGTH_SHORT
+                    ).show()
                 } else {
-                    db.cartDao().insert(CartItem(productId = product.id, quantity = currentQty + 1))
-                    activity?.runOnUiThread {
-                        Toast.makeText(
-                            requireContext(),
-                            getString(R.string.added_to_cart),
-                            Toast.LENGTH_SHORT
-                        ).show()
+                    val newCartItem = CartItem(productId = product.id, quantity = currentQty + 1)
+                    withContext(Dispatchers.IO) {
+                        db.cartDao().insert(newCartItem)
+                        val prefs = requireContext().getSharedPreferences("t20_prefs", 0)
+                        val userEmail = prefs.getString("user_email", null)
+                        if (userEmail != null) {
+                            try { firebaseRepo.saveCartItem(userEmail, newCartItem) } catch (e: Exception) { }
+                        }
                     }
+                    Toast.makeText(
+                        requireContext(),
+                        getString(R.string.added_to_cart),
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
         }
@@ -130,15 +139,15 @@ class HomeFragment : Fragment() {
     }
 
     private fun filterProducts(categoryId: String) {
-        Executors.newSingleThreadExecutor().execute {
-            val products = if (currentQuery.isEmpty()) {
-                db.productDao().getByCategory(categoryId)
-            } else {
-                db.productDao().searchByCategory(categoryId, currentQuery)
+        viewLifecycleOwner.lifecycleScope.launch {
+            val products = withContext(Dispatchers.IO) {
+                if (currentQuery.isEmpty()) {
+                    db.productDao().getByCategory(categoryId)
+                } else {
+                    db.productDao().searchByCategory(categoryId, currentQuery)
+                }
             }
-            activity?.runOnUiThread {
-                productAdapter.updateProducts(products)
-            }
+            productAdapter.updateProducts(products)
         }
     }
 
