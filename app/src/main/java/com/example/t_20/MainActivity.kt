@@ -6,8 +6,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
+import com.example.t_20.data.AppDatabase
+import com.example.t_20.data.FirebaseRepository
 import com.example.t_20.databinding.ActivityMainBinding
 import com.example.t_20.fragment.AccountFragment
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import com.example.t_20.fragment.CartFragment
 import com.example.t_20.fragment.FaqFragment
 import com.example.t_20.fragment.HomeFragment
@@ -38,6 +43,17 @@ class MainActivity : AppCompatActivity() {
         // Show home fragment by default
         if (savedInstanceState == null) {
             loadFragment(homeFragment)
+        }
+
+        // Sync products to Firebase
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val db = AppDatabase.getInstance(this@MainActivity)
+                val products = db.productDao().getAll()
+                FirebaseRepository().syncProducts(products)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 
