@@ -18,7 +18,8 @@ class FirebaseRepository {
         val userMap = hashMapOf(
             "name" to user.name,
             "email" to user.email,
-            "localId" to user.id
+            "localId" to user.id,
+            "role" to user.role
         )
         val docRef = db.collection("users").document(user.email)
         docRef.set(userMap, SetOptions.merge()).await()
@@ -32,7 +33,8 @@ class FirebaseRepository {
                 id = (doc.getLong("localId") ?: 0).toInt(),
                 name = doc.getString("name") ?: "",
                 email = doc.getString("email") ?: "",
-                password = ""
+                password = "",
+                role = doc.getString("role") ?: "cliente"
             )
         } else null
     }
@@ -169,6 +171,13 @@ class FirebaseRepository {
                 stock = (doc.getLong("stock") ?: 0).toInt()
             )
         }
+    }
+
+    suspend fun deleteProduct(productId: Int) {
+        db.collection("products")
+            .document(productId.toString())
+            .delete()
+            .await()
     }
 
     // ==================== TICKETS ====================

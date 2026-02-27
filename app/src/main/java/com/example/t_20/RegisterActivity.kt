@@ -76,6 +76,7 @@ class RegisterActivity : AppCompatActivity() {
                             .putInt("user_id", id.toInt())
                             .putString("user_name", name)
                             .putString("user_email", email)
+                            .putString("user_role", "cliente")
                             .apply()
                         finish()
                     }

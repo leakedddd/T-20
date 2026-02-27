@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.t_20.AdminActivity
 import com.example.t_20.LoginActivity
 import com.example.t_20.adapter.OrderAdapter
 import com.example.t_20.data.AppDatabase
@@ -50,6 +51,10 @@ class AccountFragment : Fragment() {
             prefs.edit().clear().apply()
             updateUI()
         }
+
+        binding.btnAdminPanel.setOnClickListener {
+            startActivity(Intent(requireContext(), AdminActivity::class.java))
+        }
     }
 
     override fun onResume() {
@@ -69,6 +74,14 @@ class AccountFragment : Fragment() {
             binding.layoutLoggedIn.visibility = View.VISIBLE
             binding.txtUserName.text = userName
             binding.txtUserEmail.text = userEmail ?: ""
+
+            // Check if user is admin
+            val userRole = prefs.getString("user_role", "cliente")
+            if (userRole == "admin") {
+                binding.btnAdminPanel.visibility = View.VISIBLE
+            } else {
+                binding.btnAdminPanel.visibility = View.GONE
+            }
 
             // Load orders
             loadOrders(userId)

@@ -184,13 +184,29 @@
                 android:nestedScrollingEnabled="false"
                 tools:listitem="@layout/item_order" />
 
+            <!-- Admin Panel Button (solo visible para admins) -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_admin_panel"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="24dp"
+                android:text="Panel de Administracion"
+                android:textColor="@color/white"
+                android:visibility="gone"
+                app:backgroundTint="@color/primary"
+                app:cornerRadius="6dp"
+                app:icon="@drawable/ic_admin"
+                app:iconGravity="textStart"
+                app:iconPadding="8dp"
+                app:iconTint="@color/white" />
+
             <!-- Logout Button -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_logout"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:layout_marginTop="24dp"
+                android:layout_marginTop="16dp"
                 android:text="@string/account_logout"
                 android:textColor="@color/text_primary"
                 app:cornerRadius="6dp"

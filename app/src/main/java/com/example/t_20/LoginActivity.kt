@@ -85,6 +85,7 @@ class LoginActivity : AppCompatActivity() {
                             .putInt("user_id", userProfile!!.id)
                             .putString("user_name", userProfile.name)
                             .putString("user_email", email)
+                            .putString("user_role", userProfile.role)
                             .apply()
                         finish()
                     }
