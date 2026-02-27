@@ -14,11 +14,10 @@ class FirebaseRepository {
     private val db = FirebaseFirestore.getInstance()
 
     // ==================== USERS ====================
-    suspend fun saveUser(user: User): String {
+    suspend fun saveUserProfile(user: User): String {
         val userMap = hashMapOf(
             "name" to user.name,
             "email" to user.email,
-            "password" to user.password,
             "localId" to user.id
         )
         val docRef = db.collection("users").document(user.email)
@@ -33,14 +32,9 @@ class FirebaseRepository {
                 id = (doc.getLong("localId") ?: 0).toInt(),
                 name = doc.getString("name") ?: "",
                 email = doc.getString("email") ?: "",
-                password = doc.getString("password") ?: ""
+                password = ""
             )
         } else null
-    }
-
-    suspend fun loginUser(email: String, password: String): User? {
-        val user = getUserByEmail(email)
-        return if (user != null && user.password == password) user else null
     }
 
     // ==================== CART ====================

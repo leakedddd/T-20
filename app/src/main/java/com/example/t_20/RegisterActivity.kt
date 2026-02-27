@@ -12,8 +12,10 @@ import com.example.t_20.data.AppDatabase
 import com.example.t_20.data.FirebaseRepository
 import com.example.t_20.databinding.ActivityRegisterBinding
 import com.example.t_20.model.User
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
 class RegisterActivity : AppCompatActivity() {
@@ -21,6 +23,7 @@ class RegisterActivity : AppCompatActivity() {
     private lateinit var binding: ActivityRegisterBinding
     private lateinit var db: AppDatabase
     private val firebaseRepo = FirebaseRepository()
+    private val auth = FirebaseAuth.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,30 +57,39 @@ class RegisterActivity : AppCompatActivity() {
             }
 
             lifecycleScope.launch {
-                val existingFirebase = withContext(Dispatchers.IO) {
-                    try { firebaseRepo.getUserByEmail(email) } catch (e: Exception) { null }
-                }
-                val existingLocal = withContext(Dispatchers.IO) { db.userDao().getByEmail(email) }
+                try {
+                    val result = auth.createUserWithEmailAndPassword(email, password).await()
+                    val firebaseUser = result.user
 
-                if (existingFirebase != null || existingLocal != null) {
-                    Toast.makeText(this@RegisterActivity, getString(R.string.register_error_exists), Toast.LENGTH_SHORT).show()
-                } else {
-                    val user = User(name = name, email = email, password = password)
-                    val id = withContext(Dispatchers.IO) { db.userDao().register(user) }
-                    val userWithId = user.copy(id = id.toInt())
+                    if (firebaseUser != null) {
+                        val user = User(name = name, email = email, password = "")
+                        val id = withContext(Dispatchers.IO) { db.userDao().register(user) }
+                        val userWithId = user.copy(id = id.toInt())
 
-                    withContext(Dispatchers.IO) {
-                        try { firebaseRepo.saveUser(userWithId) } catch (e: Exception) { }
+                        withContext(Dispatchers.IO) {
+                            try { firebaseRepo.saveUserProfile(userWithId) } catch (e: Exception) { }
+                        }
+
+                        Toast.makeText(this@RegisterActivity, getString(R.string.register_success), Toast.LENGTH_SHORT).show()
+                        val prefs = getSharedPreferences("t20_prefs", MODE_PRIVATE)
+                        prefs.edit()
+                            .putInt("user_id", id.toInt())
+                            .putString("user_name", name)
+                            .putString("user_email", email)
+                            .apply()
+                        finish()
                     }
-
-                    Toast.makeText(this@RegisterActivity, getString(R.string.register_success), Toast.LENGTH_SHORT).show()
-                    val prefs = getSharedPreferences("t20_prefs", MODE_PRIVATE)
-                    prefs.edit()
-                        .putInt("user_id", id.toInt())
-                        .putString("user_name", name)
-                        .putString("user_email", email)
-                        .apply()
-                    finish()
+                } catch (e: Exception) {
+                    val message = when {
+                        e.message?.contains("email address is already in use") == true ->
+                            getString(R.string.register_error_exists)
+                        e.message?.contains("weak password") == true ->
+                            "La contraseña debe tener al menos 6 caracteres"
+                        e.message?.contains("invalid email") == true ->
+                            "Email inválido"
+                        else -> "Error: ${e.message}"
+                    }
+                    Toast.makeText(this@RegisterActivity, message, Toast.LENGTH_SHORT).show()
                 }
             }
         }
