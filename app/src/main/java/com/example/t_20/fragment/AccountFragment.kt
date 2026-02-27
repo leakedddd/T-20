@@ -7,13 +7,17 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.t_20.AdminActivity
 import com.example.t_20.LoginActivity
 import com.example.t_20.adapter.OrderAdapter
 import com.example.t_20.data.AppDatabase
+import com.example.t_20.data.FirebaseRepository
 import com.example.t_20.databinding.FragmentAccountBinding
-import java.util.concurrent.Executors
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class AccountFragment : Fragment() {
 
@@ -22,6 +26,7 @@ class AccountFragment : Fragment() {
 
     private lateinit var db: AppDatabase
     private lateinit var orderAdapter: OrderAdapter
+    private val firebaseRepo = FirebaseRepository()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -83,8 +88,8 @@ class AccountFragment : Fragment() {
                 binding.btnAdminPanel.visibility = View.GONE
             }
 
-            // Load orders
-            loadOrders(userId)
+            // Load orders from Firebase
+            loadOrders(userEmail ?: "")
         } else {
             // Guest
             binding.layoutGuest.visibility = View.VISIBLE
@@ -92,18 +97,30 @@ class AccountFragment : Fragment() {
         }
     }
 
-    private fun loadOrders(userId: Int) {
-        Executors.newSingleThreadExecutor().execute {
-            val orders = db.orderDao().getOrdersByUser(userId)
-            activity?.runOnUiThread {
-                if (orders.isEmpty()) {
+    private fun loadOrders(userEmail: String) {
+        if (userEmail.isEmpty()) {
+            binding.txtNoOrders.visibility = View.VISIBLE
+            binding.recyclerOrders.visibility = View.GONE
+            return
+        }
+
+        lifecycleScope.launch {
+            try {
+                val ordersWithItems = withContext(Dispatchers.IO) {
+                    firebaseRepo.getOrders(userEmail)
+                }
+                if (ordersWithItems.isEmpty()) {
                     binding.txtNoOrders.visibility = View.VISIBLE
                     binding.recyclerOrders.visibility = View.GONE
                 } else {
                     binding.txtNoOrders.visibility = View.GONE
                     binding.recyclerOrders.visibility = View.VISIBLE
+                    val orders = ordersWithItems.map { it.first }
                     orderAdapter.updateOrders(orders)
                 }
+            } catch (e: Exception) {
+                binding.txtNoOrders.visibility = View.VISIBLE
+                binding.recyclerOrders.visibility = View.GONE
             }
         }
     }
