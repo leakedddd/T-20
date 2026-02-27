@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "439121334291",
+    "firebase_url": "https://t-20-96f9a-default-rtdb.firebaseio.com",
+    "project_id": "t-20-96f9a",
+    "storage_bucket": "t-20-96f9a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:439121334291:android:4daeeeccdf48a0bcd2afe6",
+        "android_client_info": {
+          "package_name": "com.example.t_20"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBMyJcHwvO30C5E1a4D7SMu80Yut8oUfzI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
