@@ -7,6 +7,7 @@ import coil.load
 import com.example.t_20.R
 import com.example.t_20.databinding.ItemAdminProductBinding
 import com.example.t_20.model.Product
+import com.example.t_20.util.ImageHelper
 import java.util.Locale
 
 class AdminProductAdapter(
@@ -23,13 +24,16 @@ class AdminProductAdapter(
             binding.apply {
                 if (!product.imageUrl.isNullOrEmpty()) {
                     imgProduct.load(product.imageUrl) {
-                        placeholder(R.drawable.black_ring)
-                        error(R.drawable.black_ring)
+                        placeholder(R.drawable.error404)
+                        error(R.drawable.error404)
                     }
-                } else if (product.imageRes != 0) {
-                    imgProduct.setImageResource(product.imageRes)
                 } else {
-                    imgProduct.setImageResource(R.drawable.black_ring)
+                    val imageRes = if (ImageHelper.isValidResourceId(root.context, product.imageRes)) {
+                        product.imageRes
+                    } else {
+                        ImageHelper.getImageResForProduct(product.name)
+                    }
+                    imgProduct.setImageResource(imageRes)
                 }
                 txtName.text = product.name
                 txtCategory.text = product.category.replaceFirstChar { it.uppercase() }

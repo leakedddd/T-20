@@ -7,6 +7,7 @@ import coil.load
 import com.example.t_20.R
 import com.example.t_20.databinding.ItemProductBinding
 import com.example.t_20.model.Product
+import com.example.t_20.util.ImageHelper
 import java.util.Locale
 
 class ProductAdapter(
@@ -22,13 +23,17 @@ class ProductAdapter(
             binding.apply {
                 if (!product.imageUrl.isNullOrEmpty()) {
                     imgProduct.load(product.imageUrl) {
-                        placeholder(R.drawable.black_ring)
-                        error(R.drawable.black_ring)
+                        placeholder(R.drawable.error404)
+                        error(R.drawable.error404)
                     }
-                } else if (product.imageRes != 0) {
-                    imgProduct.setImageResource(product.imageRes)
                 } else {
-                    imgProduct.setImageResource(R.drawable.black_ring)
+                    // Usar ImageHelper para obtener el drawable correcto por nombre
+                    val imageRes = if (ImageHelper.isValidResourceId(root.context, product.imageRes)) {
+                        product.imageRes
+                    } else {
+                        ImageHelper.getImageResForProduct(product.name)
+                    }
+                    imgProduct.setImageResource(imageRes)
                 }
                 txtProductName.text = product.name
                 txtProductPrice.text = String.format(Locale.US, "%.2f", product.price)

@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.t_20.R
 import com.example.t_20.databinding.ItemCartBinding
 import com.example.t_20.model.CartWithProduct
+import com.example.t_20.util.ImageHelper
 import java.util.Locale
 
 class CartAdapter(
@@ -24,7 +25,12 @@ class CartAdapter(
             val cartItem = item.cartItem
 
             binding.apply {
-                imgCartProduct.setImageResource(product.imageRes)
+                val imageRes = if (ImageHelper.isValidResourceId(root.context, product.imageRes)) {
+                    product.imageRes
+                } else {
+                    ImageHelper.getImageResForProduct(product.name)
+                }
+                imgCartProduct.setImageResource(imageRes)
                 txtCartName.text = product.name
                 txtCartPrice.text = String.format(Locale.US, "$%.2f", product.price)
                 txtQuantity.text = cartItem.quantity.toString()

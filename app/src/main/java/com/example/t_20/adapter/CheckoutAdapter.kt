@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.t_20.databinding.ItemCheckoutProductBinding
 import com.example.t_20.model.CartWithProduct
+import com.example.t_20.util.ImageHelper
 import java.util.Locale
 
 class CheckoutAdapter(
@@ -16,7 +17,12 @@ class CheckoutAdapter(
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(item: CartWithProduct) {
-            binding.imgCheckoutProduct.setImageResource(item.product.imageRes)
+            val imageRes = if (ImageHelper.isValidResourceId(binding.root.context, item.product.imageRes)) {
+                item.product.imageRes
+            } else {
+                ImageHelper.getImageResForProduct(item.product.name)
+            }
+            binding.imgCheckoutProduct.setImageResource(imageRes)
             binding.txtCheckoutProductName.text = "${item.product.name} x${item.cartItem.quantity}"
             binding.txtCheckoutProductPrice.text = String.format(
                 Locale.US,
