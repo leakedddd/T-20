@@ -100,6 +100,22 @@ class CheckoutActivity : AppCompatActivity() {
                 }
                 db.orderDao().insertOrderItems(orderItems)
 
+                // Reducir stock de cada producto comprado
+                cartItems.forEach { cartWithProduct ->
+                    val product = cartWithProduct.product
+                    val quantityBought = cartWithProduct.cartItem.quantity
+                    val newStock = (product.stock - quantityBought).coerceAtLeast(0)
+                    db.productDao().updateStock(product.id, newStock)
+                }
+
+                // Sincronizar productos actualizados con Firebase
+                try {
+                    val updatedProducts = db.productDao().getAll()
+                    firebaseRepo.syncProducts(updatedProducts)
+                } catch (e: Exception) {
+                    android.util.Log.e("CheckoutActivity", "Error syncing products: ${e.message}", e)
+                }
+
                 if (userEmail != null) {
                     try {
                         firebaseRepo.saveOrder(userEmail, order.copy(id = orderId.toInt()), orderItems)
