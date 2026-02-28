@@ -276,12 +276,21 @@ class AdminActivity : AppCompatActivity() {
             .setTitle("Eliminar Producto")
             .setMessage("¿Estás seguro de eliminar ${product.name}?")
             .setPositiveButton("Eliminar") { _, _ ->
-                Executors.newSingleThreadExecutor().execute {
-                    db.productDao().delete(product)
-                    runOnUiThread {
-                        Toast.makeText(this, "Producto eliminado", Toast.LENGTH_SHORT).show()
+                lifecycleScope.launch {
+                    try {
+                        // Eliminar de la base de datos local
+                        withContext(Dispatchers.IO) {
+                            db.productDao().delete(product)
+                        }
+                        // Eliminar de Firebase
+                        withContext(Dispatchers.IO) {
+                            firebaseRepo.deleteProduct(product.id)
+                        }
+                        Toast.makeText(this@AdminActivity, "Producto eliminado", Toast.LENGTH_SHORT).show()
                         loadProducts()
-                        syncToFirebase()
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        Toast.makeText(this@AdminActivity, "Error al eliminar", Toast.LENGTH_SHORT).show()
                     }
                 }
             }
