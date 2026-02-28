@@ -15,6 +15,7 @@ import com.example.t_20.adapter.OrderAdapter
 import com.example.t_20.data.AppDatabase
 import com.example.t_20.data.FirebaseRepository
 import com.example.t_20.databinding.FragmentAccountBinding
+import com.example.t_20.model.OrderWithItems
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -115,7 +116,7 @@ class AccountFragment : Fragment() {
                 } else {
                     binding.txtNoOrders.visibility = View.GONE
                     binding.recyclerOrders.visibility = View.VISIBLE
-                    val orders = ordersWithItems.map { it.first }
+                    val orders = ordersWithItems.map { OrderWithItems(it.first, it.second) }
                     orderAdapter.updateOrders(orders)
                 }
             } catch (e: Exception) {
