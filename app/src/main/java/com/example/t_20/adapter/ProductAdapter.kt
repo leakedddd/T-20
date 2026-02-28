@@ -3,6 +3,8 @@ package com.example.t_20.adapter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import coil.load
+import com.example.t_20.R
 import com.example.t_20.databinding.ItemProductBinding
 import com.example.t_20.model.Product
 import java.util.Locale
@@ -18,7 +20,16 @@ class ProductAdapter(
 
         fun bind(product: Product) {
             binding.apply {
-                imgProduct.setImageResource(product.imageRes)
+                if (!product.imageUrl.isNullOrEmpty()) {
+                    imgProduct.load(product.imageUrl) {
+                        placeholder(R.drawable.black_ring)
+                        error(R.drawable.black_ring)
+                    }
+                } else if (product.imageRes != 0) {
+                    imgProduct.setImageResource(product.imageRes)
+                } else {
+                    imgProduct.setImageResource(R.drawable.black_ring)
+                }
                 txtProductName.text = product.name
                 txtProductPrice.text = String.format(Locale.US, "%.2f", product.price)
 

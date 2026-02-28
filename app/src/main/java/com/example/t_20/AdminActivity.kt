@@ -1,28 +1,36 @@
 package com.example.t_20
 
+import android.net.Uri
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import coil.load
 import com.example.t_20.adapter.AdminProductAdapter
 import com.example.t_20.data.AppDatabase
 import com.example.t_20.data.FirebaseRepository
 import com.example.t_20.databinding.ActivityAdminBinding
 import com.example.t_20.databinding.DialogProductFormBinding
 import com.example.t_20.model.Product
+import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.concurrent.Executors
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
 class AdminActivity : AppCompatActivity() {
 
@@ -30,6 +38,21 @@ class AdminActivity : AppCompatActivity() {
     private lateinit var db: AppDatabase
     private lateinit var adapter: AdminProductAdapter
     private val firebaseRepo = FirebaseRepository()
+    private val storage = FirebaseStorage.getInstance()
+
+    private var allProducts = listOf<Product>()
+    private var selectedImageUri: Uri? = null
+    private var currentDialogBinding: DialogProductFormBinding? = null
+
+    private val pickImage = registerForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            selectedImageUri = it
+            currentDialogBinding?.imgPreview?.visibility = View.VISIBLE
+            currentDialogBinding?.imgPreview?.load(it)
+        }
+    }
 
     private val categories = listOf("accesorios", "camisas", "pantalones", "poleras", "polos")
 
@@ -108,11 +131,32 @@ class AdminActivity : AppCompatActivity() {
     private fun setupListeners() {
         binding.btnBack.setOnClickListener { finish() }
         binding.fabAdd.setOnClickListener { showProductDialog(null) }
+        setupSearch()
+    }
+
+    private fun setupSearch() {
+        binding.editSearch.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                val query = s?.toString()?.lowercase() ?: ""
+                if (query.isEmpty()) {
+                    adapter.updateProducts(allProducts)
+                } else {
+                    val filtered = allProducts.filter {
+                        it.name.lowercase().contains(query) ||
+                        it.category.lowercase().contains(query)
+                    }
+                    adapter.updateProducts(filtered)
+                }
+            }
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        })
     }
 
     private fun loadProducts() {
         Executors.newSingleThreadExecutor().execute {
             val products = db.productDao().getAll()
+            allProducts = products
             runOnUiThread {
                 if (products.isEmpty()) {
                     binding.txtEmpty.visibility = View.VISIBLE
@@ -128,6 +172,8 @@ class AdminActivity : AppCompatActivity() {
 
     private fun showProductDialog(product: Product?) {
         val dialogBinding = DialogProductFormBinding.inflate(LayoutInflater.from(this))
+        currentDialogBinding = dialogBinding
+        selectedImageUri = null
         val isEdit = product != null
 
         dialogBinding.txtDialogTitle.text = if (isEdit) "Editar Producto" else "Nuevo Producto"
@@ -140,14 +186,9 @@ class AdminActivity : AppCompatActivity() {
         categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         dialogBinding.spinnerCategory.adapter = categoryAdapter
 
-        val imageNames = availableImages.keys.toList()
-        val imageAdapter = ArrayAdapter(
-            this,
-            android.R.layout.simple_spinner_item,
-            imageNames.map { it.replace("_", " ").replaceFirstChar { c -> c.uppercase() } }
-        )
-        imageAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        dialogBinding.spinnerImage.adapter = imageAdapter
+        dialogBinding.btnSelectImage.setOnClickListener {
+            pickImage.launch("image/*")
+        }
 
         if (isEdit) {
             dialogBinding.editName.setText(product!!.name)
@@ -162,31 +203,22 @@ class AdminActivity : AppCompatActivity() {
                 dialogBinding.spinnerCategory.setSelection(categoryIndex)
             }
 
-            val imageEntry = availableImages.entries.find { it.value == product.imageRes }
-            val imageIndex = imageNames.indexOf(imageEntry?.key)
-            if (imageIndex >= 0) {
-                dialogBinding.spinnerImage.setSelection(imageIndex)
-            }
-
             dialogBinding.imgPreview.visibility = View.VISIBLE
-            dialogBinding.imgPreview.setImageResource(product.imageRes)
-        }
-
-        dialogBinding.spinnerImage.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                val selectedImageName = imageNames[position]
-                val imageRes = availableImages[selectedImageName] ?: return
-                dialogBinding.imgPreview.visibility = View.VISIBLE
-                dialogBinding.imgPreview.setImageResource(imageRes)
+            if (!product.imageUrl.isNullOrEmpty()) {
+                dialogBinding.imgPreview.load(product.imageUrl)
+            } else if (product.imageRes != 0) {
+                dialogBinding.imgPreview.setImageResource(product.imageRes)
             }
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
 
         val dialog = AlertDialog.Builder(this)
             .setView(dialogBinding.root)
             .create()
 
-        dialogBinding.btnCancel.setOnClickListener { dialog.dismiss() }
+        dialogBinding.btnCancel.setOnClickListener {
+            currentDialogBinding = null
+            dialog.dismiss()
+        }
 
         dialogBinding.btnSave.setOnClickListener {
             val name = dialogBinding.editName.text.toString().trim()
@@ -194,7 +226,6 @@ class AdminActivity : AppCompatActivity() {
             val originalPriceStr = dialogBinding.editOriginalPrice.text.toString().trim()
             val stockStr = dialogBinding.editStock.text.toString().trim()
             val categoryIndex = dialogBinding.spinnerCategory.selectedItemPosition
-            val imageIndex = dialogBinding.spinnerImage.selectedItemPosition
 
             if (name.isEmpty() || priceStr.isEmpty() || stockStr.isEmpty()) {
                 Toast.makeText(this, "Todos los campos son obligatorios", Toast.LENGTH_SHORT).show()
@@ -213,36 +244,63 @@ class AdminActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
+            if (!isEdit && selectedImageUri == null) {
+                Toast.makeText(this, "Debes seleccionar una imagen", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
             val originalPrice = originalPriceStr.toDoubleOrNull()
             val category = categories[categoryIndex]
-            val imageRes = availableImages[imageNames[imageIndex]] ?: R.drawable.black_ring
 
-            val newProduct = Product(
-                id = product?.id ?: 0,
-                name = name,
-                price = price,
-                originalPrice = originalPrice,
-                imageRes = imageRes,
-                category = category,
-                stock = stock
-            )
+            dialogBinding.btnSave.isEnabled = false
+            dialogBinding.btnSave.text = "Guardando..."
 
-            Executors.newSingleThreadExecutor().execute {
-                if (isEdit) {
-                    db.productDao().update(newProduct)
-                } else {
-                    db.productDao().insert(newProduct)
-                }
+            lifecycleScope.launch {
+                try {
+                    val imageUrl = if (selectedImageUri != null) {
+                        withContext(Dispatchers.IO) {
+                            uploadImageToStorage(selectedImageUri!!, name)
+                        }
+                    } else {
+                        product?.imageUrl
+                    }
 
-                runOnUiThread {
+                    val newProduct = Product(
+                        id = product?.id ?: 0,
+                        name = name,
+                        price = price,
+                        originalPrice = originalPrice,
+                        imageRes = product?.imageRes ?: 0,
+                        imageUrl = imageUrl,
+                        category = category,
+                        stock = stock
+                    )
+
+                    withContext(Dispatchers.IO) {
+                        if (isEdit) {
+                            db.productDao().update(newProduct)
+                        } else {
+                            db.productDao().insert(newProduct)
+                        }
+                    }
+
                     Toast.makeText(
-                        this,
+                        this@AdminActivity,
                         if (isEdit) "Producto actualizado" else "Producto agregado",
                         Toast.LENGTH_SHORT
                     ).show()
+                    currentDialogBinding = null
                     dialog.dismiss()
                     loadProducts()
                     syncToFirebase()
+                } catch (e: Exception) {
+                    Toast.makeText(
+                        this@AdminActivity,
+                        "Error: ${e.message}",
+                        Toast.LENGTH_LONG
+                    ).show()
+                    dialogBinding.btnSave.isEnabled = true
+                    dialogBinding.btnSave.text = "Guardar"
                 }
             }
         }
@@ -276,6 +334,25 @@ class AdminActivity : AppCompatActivity() {
             } catch (e: Exception) {
                 e.printStackTrace()
             }
+        }
+    }
+
+    private suspend fun uploadImageToStorage(uri: Uri, productName: String): String {
+        val fileName = "products/${System.currentTimeMillis()}_${productName.replace(" ", "_")}.jpg"
+        val ref = storage.reference.child(fileName)
+
+        return suspendCoroutine { cont ->
+            ref.putFile(uri)
+                .continueWithTask { task ->
+                    if (!task.isSuccessful) throw task.exception!!
+                    ref.downloadUrl
+                }
+                .addOnSuccessListener { downloadUrl ->
+                    cont.resume(downloadUrl.toString())
+                }
+                .addOnFailureListener { e ->
+                    cont.resumeWithException(e)
+                }
         }
     }
 }

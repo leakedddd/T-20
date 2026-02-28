@@ -148,6 +148,7 @@ class FirebaseRepository {
                 "price" to product.price,
                 "originalPrice" to product.originalPrice,
                 "imageRes" to product.imageRes,
+                "imageUrl" to product.imageUrl,
                 "category" to product.category,
                 "stock" to product.stock
             )
@@ -167,6 +168,7 @@ class FirebaseRepository {
                 price = doc.getDouble("price") ?: 0.0,
                 originalPrice = doc.getDouble("originalPrice"),
                 imageRes = (doc.getLong("imageRes") ?: 0).toInt(),
+                imageUrl = doc.getString("imageUrl"),
                 category = doc.getString("category") ?: "",
                 stock = (doc.getLong("stock") ?: 0).toInt()
             )
