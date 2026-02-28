@@ -27,18 +27,11 @@ class CheckoutAdapter(
             binding.imgCheckoutProduct.tag = item.product.id
 
             if (!item.product.imageUrl.isNullOrEmpty()) {
-                val productId = item.product.id
                 binding.imgCheckoutProduct.load(item.product.imageUrl) {
                     placeholder(R.drawable.error404)
                     error(R.drawable.error404)
                     memoryCachePolicy(CachePolicy.DISABLED)
-                    listener(
-                        onSuccess = { _, result ->
-                            if (binding.imgCheckoutProduct.tag == productId) {
-                                binding.imgCheckoutProduct.setImageDrawable(result.drawable)
-                            }
-                        }
-                    )
+                    diskCachePolicy(CachePolicy.DISABLED)
                 }
             } else {
                 val imageRes = if (ImageHelper.isValidResourceId(binding.root.context, item.product.imageRes)) {

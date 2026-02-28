@@ -52,20 +52,12 @@ class OrderAdapter(
                         clipToOutline = true
                     }
 
-                    imageView.tag = item.productId
                     if (!item.productImageUrl.isNullOrEmpty()) {
-                        val productId = item.productId
                         imageView.load(item.productImageUrl) {
                             placeholder(R.drawable.error404)
                             error(R.drawable.error404)
                             memoryCachePolicy(CachePolicy.DISABLED)
-                            listener(
-                                onSuccess = { _, result ->
-                                    if (imageView.tag == productId) {
-                                        imageView.setImageDrawable(result.drawable)
-                                    }
-                                }
-                            )
+                            diskCachePolicy(CachePolicy.DISABLED)
                         }
                     } else {
                         val imageRes = if (ImageHelper.isValidResourceId(root.context, item.productImageRes)) {

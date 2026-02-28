@@ -34,18 +34,11 @@ class CartAdapter(
                 imgCartProduct.tag = product.id
 
                 if (!product.imageUrl.isNullOrEmpty()) {
-                    val productId = product.id
                     imgCartProduct.load(product.imageUrl) {
                         placeholder(R.drawable.error404)
                         error(R.drawable.error404)
                         memoryCachePolicy(CachePolicy.DISABLED)
-                        listener(
-                            onSuccess = { _, result ->
-                                if (imgCartProduct.tag == productId) {
-                                    imgCartProduct.setImageDrawable(result.drawable)
-                                }
-                            }
-                        )
+                        diskCachePolicy(CachePolicy.DISABLED)
                     }
                 } else {
                     val imageRes = if (ImageHelper.isValidResourceId(root.context, product.imageRes)) {

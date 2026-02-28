@@ -29,18 +29,11 @@ class ProductAdapter(
                 imgProduct.tag = product.id
 
                 if (!product.imageUrl.isNullOrEmpty()) {
-                    val productId = product.id
                     imgProduct.load(product.imageUrl) {
                         placeholder(R.drawable.error404)
                         error(R.drawable.error404)
                         memoryCachePolicy(CachePolicy.DISABLED)
-                        listener(
-                            onSuccess = { _, result ->
-                                if (imgProduct.tag == productId) {
-                                    imgProduct.setImageDrawable(result.drawable)
-                                }
-                            }
-                        )
+                        diskCachePolicy(CachePolicy.DISABLED)
                     }
                 } else {
                     val imageRes = if (ImageHelper.isValidResourceId(root.context, product.imageRes)) {
