@@ -9,7 +9,6 @@ data class Product(
     val id: Int = 0,
     val name: String,
     val price: Double,
-    val originalPrice: Double? = null,
     val imageRes: Int = 0,
     val imageUrl: String? = null,
     val category: String,

@@ -168,9 +168,6 @@ class AdminActivity : AppCompatActivity() {
         if (isEdit) {
             dialogBinding.editName.setText(product!!.name)
             dialogBinding.editPrice.setText(product.price.toString())
-            product.originalPrice?.let {
-                dialogBinding.editOriginalPrice.setText(it.toString())
-            }
             dialogBinding.editStock.setText(product.stock.toString())
 
             val categoryIndex = categories.indexOf(product.category)
@@ -200,7 +197,6 @@ class AdminActivity : AppCompatActivity() {
         dialogBinding.btnSave.setOnClickListener {
             val name = dialogBinding.editName.text.toString().trim()
             val priceStr = dialogBinding.editPrice.text.toString().trim()
-            val originalPriceStr = dialogBinding.editOriginalPrice.text.toString().trim()
             val stockStr = dialogBinding.editStock.text.toString().trim()
             val categoryIndex = dialogBinding.spinnerCategory.selectedItemPosition
             val imageUrl = dialogBinding.editImageUrl.text.toString().trim()
@@ -234,14 +230,12 @@ class AdminActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            val originalPrice = originalPriceStr.toDoubleOrNull()
             val category = categories[categoryIndex]
 
             val newProduct = Product(
                 id = product?.id ?: 0,
                 name = name,
                 price = price,
-                originalPrice = originalPrice,
                 imageRes = product?.imageRes ?: 0,
                 imageUrl = finalImageUrl,
                 category = category,

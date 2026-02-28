@@ -28,11 +28,10 @@ data class Product(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val name: String,
     val price: Double,
-    val originalPrice: Double?,  // Precio tachado (opcional)
-    val imageRes: Int,           // Imagen local (drawable)
+    val imageRes: Int = 0,       // Imagen local (drawable)
     val imageUrl: String?,       // Imagen de internet (opcional)
     val category: String,
-    val stock: Int
+    val stock: Int = 10
 )
 ```
 **Pregunta típica:** ¿Qué es @Entity? R: Define una tabla en Room.
