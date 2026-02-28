@@ -109,7 +109,8 @@ class FirebaseRepository {
                 "productName" to item.productName,
                 "productPrice" to item.productPrice,
                 "quantity" to item.quantity,
-                "productImageRes" to item.productImageRes
+                "productImageRes" to item.productImageRes,
+                "productImageUrl" to item.productImageUrl
             )
             orderRef.collection("items").add(itemMap).await()
         }
@@ -144,7 +145,8 @@ class FirebaseRepository {
                     productName = itemDoc.getString("productName") ?: "",
                     productPrice = itemDoc.getDouble("productPrice") ?: 0.0,
                     quantity = (itemDoc.getLong("quantity") ?: 1).toInt(),
-                    productImageRes = (itemDoc.getLong("productImageRes") ?: 0).toInt()
+                    productImageRes = (itemDoc.getLong("productImageRes") ?: 0).toInt(),
+                    productImageUrl = itemDoc.getString("productImageUrl")
                 )
             }
             Pair(order, items)

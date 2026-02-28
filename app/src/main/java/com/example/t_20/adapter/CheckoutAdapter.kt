@@ -3,6 +3,8 @@ package com.example.t_20.adapter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import coil.load
+import com.example.t_20.R
 import com.example.t_20.databinding.ItemCheckoutProductBinding
 import com.example.t_20.model.CartWithProduct
 import com.example.t_20.util.ImageHelper
@@ -17,12 +19,23 @@ class CheckoutAdapter(
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(item: CartWithProduct) {
-            val imageRes = if (ImageHelper.isValidResourceId(binding.root.context, item.product.imageRes)) {
-                item.product.imageRes
+            // Limpiar imagen anterior para evitar caché incorrecta
+            binding.imgCheckoutProduct.setImageDrawable(null)
+
+            if (!item.product.imageUrl.isNullOrEmpty()) {
+                binding.imgCheckoutProduct.load(item.product.imageUrl) {
+                    placeholder(R.drawable.error404)
+                    error(R.drawable.error404)
+                    memoryCacheKey(item.product.imageUrl)
+                }
             } else {
-                ImageHelper.getImageResForProduct(item.product.name)
+                val imageRes = if (ImageHelper.isValidResourceId(binding.root.context, item.product.imageRes)) {
+                    item.product.imageRes
+                } else {
+                    ImageHelper.getImageResForProduct(item.product.name)
+                }
+                binding.imgCheckoutProduct.setImageResource(imageRes)
             }
-            binding.imgCheckoutProduct.setImageResource(imageRes)
             binding.txtCheckoutProductName.text = "${item.product.name} x${item.cartItem.quantity}"
             binding.txtCheckoutProductPrice.text = String.format(
                 Locale.US,

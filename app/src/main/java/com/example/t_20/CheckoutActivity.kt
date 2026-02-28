@@ -99,7 +99,8 @@ class CheckoutActivity : AppCompatActivity() {
                         productName = cartWithProduct.product.name,
                         productPrice = cartWithProduct.product.price,
                         quantity = cartWithProduct.cartItem.quantity,
-                        productImageRes = cartWithProduct.product.imageRes
+                        productImageRes = cartWithProduct.product.imageRes,
+                        productImageUrl = cartWithProduct.product.imageUrl
                     )
                 }
                 db.orderDao().insertOrderItems(orderItems)

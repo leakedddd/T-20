@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.recyclerview.widget.RecyclerView
+import coil.load
 import com.example.t_20.R
 import com.example.t_20.databinding.ItemOrderBinding
 import com.example.t_20.model.OrderWithItems
@@ -40,20 +41,30 @@ class OrderAdapter(
                 // Add product thumbnails (max 4)
                 val displayItems = items.take(4)
                 for (item in displayItems) {
-                    val imageRes = if (ImageHelper.isValidResourceId(root.context, item.productImageRes)) {
-                        item.productImageRes
-                    } else {
-                        ImageHelper.getImageResForProduct(item.productName)
-                    }
                     val imageView = ImageView(root.context).apply {
                         layoutParams = LinearLayout.LayoutParams(40.dpToPx(), 40.dpToPx()).apply {
                             marginEnd = 8.dpToPx()
                         }
                         scaleType = ImageView.ScaleType.CENTER_CROP
-                        setImageResource(imageRes)
                         setBackgroundResource(R.drawable.bg_thumbnail)
                         clipToOutline = true
                     }
+
+                    if (!item.productImageUrl.isNullOrEmpty()) {
+                        imageView.load(item.productImageUrl) {
+                            placeholder(R.drawable.error404)
+                            error(R.drawable.error404)
+                            memoryCacheKey(item.productImageUrl)
+                        }
+                    } else {
+                        val imageRes = if (ImageHelper.isValidResourceId(root.context, item.productImageRes)) {
+                            item.productImageRes
+                        } else {
+                            ImageHelper.getImageResForProduct(item.productName)
+                        }
+                        imageView.setImageResource(imageRes)
+                    }
+
                     layoutOrderItems.addView(imageView)
                 }
             }
