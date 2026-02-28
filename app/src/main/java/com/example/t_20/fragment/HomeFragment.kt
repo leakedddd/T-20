@@ -100,6 +100,14 @@ class HomeFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        // Sincronizar el chip seleccionado con currentCategory
+        for (i in 0 until binding.chipGroupCategories.childCount) {
+            val chip = binding.chipGroupCategories.getChildAt(i) as? Chip
+            if (chip?.tag == currentCategory) {
+                chip.isChecked = true
+                break
+            }
+        }
         filterProducts(currentCategory)
     }
 

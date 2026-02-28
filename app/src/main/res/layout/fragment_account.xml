@@ -78,7 +78,7 @@
     </LinearLayout>
 
     <!-- Logged In View -->
-    <ScrollView
+    <androidx.core.widget.NestedScrollView
         android:id="@+id/layout_logged_in"
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -215,6 +215,6 @@
 
         </LinearLayout>
 
-    </ScrollView>
+    </androidx.core.widget.NestedScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

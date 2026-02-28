@@ -80,6 +80,10 @@ class CheckoutActivity : AppCompatActivity() {
             return
         }
 
+        // Deshabilitar botón para prevenir múltiples clicks
+        binding.btnConfirm.isEnabled = false
+        binding.btnConfirm.text = "Procesando..."
+
         lifecycleScope.launch {
             withContext(Dispatchers.IO) {
                 val order = Order(
