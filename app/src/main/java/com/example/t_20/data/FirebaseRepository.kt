@@ -81,7 +81,15 @@ class FirebaseRepository {
 
     // ==================== ORDERS ====================
     suspend fun saveOrder(userEmail: String, order: Order, items: List<OrderItem>): String {
+        // Obtener el siguiente orderNumber único para este usuario
+        val existingOrders = db.collection("users").document(userEmail)
+            .collection("orders")
+            .get()
+            .await()
+        val nextOrderNumber = existingOrders.size() + 1
+
         val orderMap = hashMapOf(
+            "orderNumber" to nextOrderNumber,
             "localId" to order.id,
             "userId" to order.userId,
             "date" to order.date,
@@ -111,12 +119,16 @@ class FirebaseRepository {
     suspend fun getOrders(userEmail: String): List<Pair<Order, List<OrderItem>>> {
         val ordersSnapshot = db.collection("users").document(userEmail)
             .collection("orders")
+            .orderBy("date", com.google.firebase.firestore.Query.Direction.DESCENDING)
             .get()
             .await()
 
         return ordersSnapshot.documents.mapNotNull { orderDoc ->
+            // Usar orderNumber si existe, sino fallback a localId para órdenes antiguas
+            val orderNumber = orderDoc.getLong("orderNumber")?.toInt()
+                ?: (orderDoc.getLong("localId") ?: 0).toInt()
             val order = Order(
-                id = (orderDoc.getLong("localId") ?: 0).toInt(),
+                id = orderNumber,
                 userId = (orderDoc.getLong("userId") ?: 0).toInt(),
                 date = orderDoc.getLong("date") ?: System.currentTimeMillis(),
                 total = orderDoc.getDouble("total") ?: 0.0,
