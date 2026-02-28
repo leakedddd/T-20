@@ -1,6 +1,5 @@
 package com.example.t_20
 
-import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -9,7 +8,6 @@ import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -23,14 +21,10 @@ import com.example.t_20.data.FirebaseRepository
 import com.example.t_20.databinding.ActivityAdminBinding
 import com.example.t_20.databinding.DialogProductFormBinding
 import com.example.t_20.model.Product
-import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.concurrent.Executors
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
-import kotlin.coroutines.suspendCoroutine
 
 class AdminActivity : AppCompatActivity() {
 
@@ -38,65 +32,10 @@ class AdminActivity : AppCompatActivity() {
     private lateinit var db: AppDatabase
     private lateinit var adapter: AdminProductAdapter
     private val firebaseRepo = FirebaseRepository()
-    private val storage = FirebaseStorage.getInstance()
 
     private var allProducts = listOf<Product>()
-    private var selectedImageUri: Uri? = null
-    private var currentDialogBinding: DialogProductFormBinding? = null
-
-    private val pickImage = registerForActivityResult(
-        ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        uri?.let {
-            selectedImageUri = it
-            currentDialogBinding?.imgPreview?.visibility = View.VISIBLE
-            currentDialogBinding?.imgPreview?.load(it)
-        }
-    }
 
     private val categories = listOf("accesorios", "camisas", "pantalones", "poleras", "polos")
-
-    private val availableImages = mapOf(
-        "black_ring" to R.drawable.black_ring,
-        "mate_bracelet" to R.drawable.mate_bracelet,
-        "military_necklace" to R.drawable.military_necklace,
-        "necklace" to R.drawable.necklace,
-        "beanie" to R.drawable.beanie,
-        "sunglasses" to R.drawable.sunglasses,
-        "scarf" to R.drawable.scarf,
-        "new_era_cap" to R.drawable.new_era_cap,
-        "skyblue_shirt" to R.drawable.skyblue_shirt,
-        "black_shirt" to R.drawable.black_shirt,
-        "brown_shirt" to R.drawable.brown_shirt,
-        "vintage" to R.drawable.vintage,
-        "dark_blue_shirt" to R.drawable.dark_blue_shirt,
-        "sage_shirt" to R.drawable.sage_shirt,
-        "camisa_casual" to R.drawable.camisa_casual,
-        "sky_blue_jeans" to R.drawable.sky_blue_jeans,
-        "dark_jean" to R.drawable.dark_jean,
-        "baggy_street_pants" to R.drawable.baggy_street_pants,
-        "black_cargo_pants" to R.drawable.black_cargo_pants,
-        "beige_cargo_pants" to R.drawable.beige_cargo_pants,
-        "black_jogger" to R.drawable.black_jogger,
-        "wind_pants" to R.drawable.wind_pants,
-        "vintage_sweatpants" to R.drawable.vintage_sweatpants,
-        "boston" to R.drawable.boston,
-        "galaxy_hoodie" to R.drawable.galaxy_hoodie,
-        "personality_hoodie" to R.drawable.personality_hoodie,
-        "macracosm" to R.drawable.macracosm,
-        "blue_sweater" to R.drawable.blue_sweater,
-        "universe_hoodie" to R.drawable.universe_hoodie,
-        "breakout" to R.drawable.breakout,
-        "fearless" to R.drawable.fearless,
-        "manchester_united" to R.drawable.manchester_united,
-        "barcelona" to R.drawable.barcelona,
-        "green_palm" to R.drawable.green_palm,
-        "basic_gray_tshirt" to R.drawable.basic_gray_tshirt,
-        "formula1" to R.drawable.formula1,
-        "human_vs_human" to R.drawable.human_vs_human,
-        "today_you_inspired_me" to R.drawable.today_you_inspired_me,
-        "olive_jacket" to R.drawable.olive_jacket
-    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -172,8 +111,6 @@ class AdminActivity : AppCompatActivity() {
 
     private fun showProductDialog(product: Product?) {
         val dialogBinding = DialogProductFormBinding.inflate(LayoutInflater.from(this))
-        currentDialogBinding = dialogBinding
-        selectedImageUri = null
         val isEdit = product != null
 
         dialogBinding.txtDialogTitle.text = if (isEdit) "Editar Producto" else "Nuevo Producto"
@@ -186,8 +123,17 @@ class AdminActivity : AppCompatActivity() {
         categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         dialogBinding.spinnerCategory.adapter = categoryAdapter
 
-        dialogBinding.btnSelectImage.setOnClickListener {
-            pickImage.launch("image/*")
+        // Preview button para ver la imagen antes de guardar
+        dialogBinding.btnPreviewImage.setOnClickListener {
+            val url = dialogBinding.editImageUrl.text.toString().trim()
+            if (url.isNotEmpty()) {
+                dialogBinding.imgPreview.visibility = View.VISIBLE
+                dialogBinding.imgPreview.load(url) {
+                    error(R.drawable.black_ring)
+                }
+            } else {
+                Toast.makeText(this, "Ingresa una URL primero", Toast.LENGTH_SHORT).show()
+            }
         }
 
         if (isEdit) {
@@ -203,10 +149,13 @@ class AdminActivity : AppCompatActivity() {
                 dialogBinding.spinnerCategory.setSelection(categoryIndex)
             }
 
-            dialogBinding.imgPreview.visibility = View.VISIBLE
+            // Mostrar URL existente
             if (!product.imageUrl.isNullOrEmpty()) {
+                dialogBinding.editImageUrl.setText(product.imageUrl)
+                dialogBinding.imgPreview.visibility = View.VISIBLE
                 dialogBinding.imgPreview.load(product.imageUrl)
             } else if (product.imageRes != 0) {
+                dialogBinding.imgPreview.visibility = View.VISIBLE
                 dialogBinding.imgPreview.setImageResource(product.imageRes)
             }
         }
@@ -216,7 +165,6 @@ class AdminActivity : AppCompatActivity() {
             .create()
 
         dialogBinding.btnCancel.setOnClickListener {
-            currentDialogBinding = null
             dialog.dismiss()
         }
 
@@ -226,6 +174,7 @@ class AdminActivity : AppCompatActivity() {
             val originalPriceStr = dialogBinding.editOriginalPrice.text.toString().trim()
             val stockStr = dialogBinding.editStock.text.toString().trim()
             val categoryIndex = dialogBinding.spinnerCategory.selectedItemPosition
+            val imageUrl = dialogBinding.editImageUrl.text.toString().trim()
 
             if (name.isEmpty() || priceStr.isEmpty() || stockStr.isEmpty()) {
                 Toast.makeText(this, "Todos los campos son obligatorios", Toast.LENGTH_SHORT).show()
@@ -244,63 +193,48 @@ class AdminActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            if (!isEdit && selectedImageUri == null) {
-                Toast.makeText(this, "Debes seleccionar una imagen", Toast.LENGTH_SHORT).show()
+            // Validar que haya imagen (URL o existente)
+            val finalImageUrl = if (imageUrl.isNotEmpty()) {
+                imageUrl
+            } else {
+                product?.imageUrl
+            }
+
+            if (finalImageUrl.isNullOrEmpty() && (product?.imageRes ?: 0) == 0) {
+                Toast.makeText(this, "Debes ingresar una URL de imagen", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
             val originalPrice = originalPriceStr.toDoubleOrNull()
             val category = categories[categoryIndex]
 
-            dialogBinding.btnSave.isEnabled = false
-            dialogBinding.btnSave.text = "Guardando..."
+            val newProduct = Product(
+                id = product?.id ?: 0,
+                name = name,
+                price = price,
+                originalPrice = originalPrice,
+                imageRes = product?.imageRes ?: 0,
+                imageUrl = finalImageUrl,
+                category = category,
+                stock = stock
+            )
 
-            lifecycleScope.launch {
-                try {
-                    val imageUrl = if (selectedImageUri != null) {
-                        withContext(Dispatchers.IO) {
-                            uploadImageToStorage(selectedImageUri!!, name)
-                        }
-                    } else {
-                        product?.imageUrl
-                    }
+            Executors.newSingleThreadExecutor().execute {
+                if (isEdit) {
+                    db.productDao().update(newProduct)
+                } else {
+                    db.productDao().insert(newProduct)
+                }
 
-                    val newProduct = Product(
-                        id = product?.id ?: 0,
-                        name = name,
-                        price = price,
-                        originalPrice = originalPrice,
-                        imageRes = product?.imageRes ?: 0,
-                        imageUrl = imageUrl,
-                        category = category,
-                        stock = stock
-                    )
-
-                    withContext(Dispatchers.IO) {
-                        if (isEdit) {
-                            db.productDao().update(newProduct)
-                        } else {
-                            db.productDao().insert(newProduct)
-                        }
-                    }
-
+                runOnUiThread {
                     Toast.makeText(
-                        this@AdminActivity,
+                        this,
                         if (isEdit) "Producto actualizado" else "Producto agregado",
                         Toast.LENGTH_SHORT
                     ).show()
-                    currentDialogBinding = null
                     dialog.dismiss()
                     loadProducts()
                     syncToFirebase()
-                } catch (e: Exception) {
-                    Toast.makeText(
-                        this@AdminActivity,
-                        "Error: ${e.message}",
-                        Toast.LENGTH_LONG
-                    ).show()
-                    dialogBinding.btnSave.isEnabled = true
-                    dialogBinding.btnSave.text = "Guardar"
                 }
             }
         }
@@ -334,25 +268,6 @@ class AdminActivity : AppCompatActivity() {
             } catch (e: Exception) {
                 e.printStackTrace()
             }
-        }
-    }
-
-    private suspend fun uploadImageToStorage(uri: Uri, productName: String): String {
-        val fileName = "products/${System.currentTimeMillis()}_${productName.replace(" ", "_")}.jpg"
-        val ref = storage.reference.child(fileName)
-
-        return suspendCoroutine { cont ->
-            ref.putFile(uri)
-                .continueWithTask { task ->
-                    if (!task.isSuccessful) throw task.exception!!
-                    ref.downloadUrl
-                }
-                .addOnSuccessListener { downloadUrl ->
-                    cont.resume(downloadUrl.toString())
-                }
-                .addOnFailureListener { e ->
-                    cont.resumeWithException(e)
-                }
         }
     }
 }

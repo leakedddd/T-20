@@ -105,24 +105,41 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="Imagen"
+            android:text="Imagen (URL)"
             android:textColor="@color/text_secondary"
             android:textSize="12sp" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_select_image"
+        <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Seleccionar imagen"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+            android:hint="Pegar URL de imagen"
+            app:boxStrokeColor="@color/primary"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edit_image_url"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textUri" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_preview_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="8dp"
+            android:text="Ver preview"
+            style="@style/Widget.MaterialComponents.Button.TextButton" />
 
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/img_preview"
             android:layout_width="150dp"
             android:layout_height="150dp"
             android:layout_gravity="center"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="8dp"
             android:scaleType="centerCrop"
             android:visibility="gone"
             app:shapeAppearanceOverlay="@style/RoundedImageStyle" />
