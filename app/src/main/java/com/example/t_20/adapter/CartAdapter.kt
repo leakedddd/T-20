@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
+import coil.load
 import com.example.t_20.R
 import com.example.t_20.databinding.ItemCartBinding
 import com.example.t_20.model.CartWithProduct
@@ -25,12 +26,23 @@ class CartAdapter(
             val cartItem = item.cartItem
 
             binding.apply {
-                val imageRes = if (ImageHelper.isValidResourceId(root.context, product.imageRes)) {
-                    product.imageRes
+                // Limpiar imagen anterior para evitar caché incorrecta
+                imgCartProduct.setImageDrawable(null)
+
+                if (!product.imageUrl.isNullOrEmpty()) {
+                    imgCartProduct.load(product.imageUrl) {
+                        placeholder(R.drawable.error404)
+                        error(R.drawable.error404)
+                        memoryCacheKey(product.imageUrl)
+                    }
                 } else {
-                    ImageHelper.getImageResForProduct(product.name)
+                    val imageRes = if (ImageHelper.isValidResourceId(root.context, product.imageRes)) {
+                        product.imageRes
+                    } else {
+                        ImageHelper.getImageResForProduct(product.name)
+                    }
+                    imgCartProduct.setImageResource(imageRes)
                 }
-                imgCartProduct.setImageResource(imageRes)
                 txtCartName.text = product.name
                 txtCartPrice.text = String.format(Locale.US, "$%.2f", product.price)
                 txtQuantity.text = cartItem.quantity.toString()

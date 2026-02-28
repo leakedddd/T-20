@@ -21,10 +21,14 @@ class ProductAdapter(
 
         fun bind(product: Product) {
             binding.apply {
+                // Limpiar imagen anterior para evitar caché incorrecta
+                imgProduct.setImageDrawable(null)
+
                 if (!product.imageUrl.isNullOrEmpty()) {
                     imgProduct.load(product.imageUrl) {
                         placeholder(R.drawable.error404)
                         error(R.drawable.error404)
+                        memoryCacheKey(product.imageUrl)
                     }
                 } else {
                     // Usar ImageHelper para obtener el drawable correcto por nombre
