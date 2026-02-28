@@ -6,6 +6,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
+import coil.request.CachePolicy
 import com.example.t_20.R
 import com.example.t_20.databinding.ItemOrderBinding
 import com.example.t_20.model.OrderWithItems
@@ -54,7 +55,7 @@ class OrderAdapter(
                         imageView.load(item.productImageUrl) {
                             placeholder(R.drawable.error404)
                             error(R.drawable.error404)
-                            memoryCacheKey(item.productImageUrl)
+                            memoryCachePolicy(CachePolicy.DISABLED)
                         }
                     } else {
                         val imageRes = if (ImageHelper.isValidResourceId(root.context, item.productImageRes)) {

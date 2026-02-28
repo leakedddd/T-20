@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
+import coil.request.CachePolicy
 import com.example.t_20.R
 import com.example.t_20.databinding.ItemAdminProductBinding
 import com.example.t_20.model.Product
@@ -29,7 +30,7 @@ class AdminProductAdapter(
                     imgProduct.load(product.imageUrl) {
                         placeholder(R.drawable.error404)
                         error(R.drawable.error404)
-                        memoryCacheKey(product.imageUrl)
+                        memoryCachePolicy(CachePolicy.DISABLED)
                     }
                 } else {
                     val imageRes = if (ImageHelper.isValidResourceId(root.context, product.imageRes)) {

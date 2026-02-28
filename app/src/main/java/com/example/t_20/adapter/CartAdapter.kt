@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
+import coil.request.CachePolicy
 import com.example.t_20.R
 import com.example.t_20.databinding.ItemCartBinding
 import com.example.t_20.model.CartWithProduct
@@ -33,7 +34,7 @@ class CartAdapter(
                     imgCartProduct.load(product.imageUrl) {
                         placeholder(R.drawable.error404)
                         error(R.drawable.error404)
-                        memoryCacheKey(product.imageUrl)
+                        memoryCachePolicy(CachePolicy.DISABLED)
                     }
                 } else {
                     val imageRes = if (ImageHelper.isValidResourceId(root.context, product.imageRes)) {

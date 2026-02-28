@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
+import coil.request.CachePolicy
 import com.example.t_20.R
 import com.example.t_20.databinding.ItemCheckoutProductBinding
 import com.example.t_20.model.CartWithProduct
@@ -26,7 +27,7 @@ class CheckoutAdapter(
                 binding.imgCheckoutProduct.load(item.product.imageUrl) {
                     placeholder(R.drawable.error404)
                     error(R.drawable.error404)
-                    memoryCacheKey(item.product.imageUrl)
+                    memoryCachePolicy(CachePolicy.DISABLED)
                 }
             } else {
                 val imageRes = if (ImageHelper.isValidResourceId(binding.root.context, item.product.imageRes)) {

@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
+import coil.request.CachePolicy
 import com.example.t_20.R
 import com.example.t_20.databinding.ItemProductBinding
 import com.example.t_20.model.Product
@@ -28,7 +29,7 @@ class ProductAdapter(
                     imgProduct.load(product.imageUrl) {
                         placeholder(R.drawable.error404)
                         error(R.drawable.error404)
-                        memoryCacheKey(product.imageUrl)
+                        memoryCachePolicy(CachePolicy.DISABLED)
                     }
                 } else {
                     // Usar ImageHelper para obtener el drawable correcto por nombre
