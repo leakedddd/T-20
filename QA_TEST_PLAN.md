@@ -194,7 +194,7 @@
 
 | # | Pantalla | Descripción | Severidad | Estado |
 |---|----------|-------------|-----------|--------|
-| 1 |          |             |           |        |
+| 1 | Admin Panel, Cart | Imágenes de productos se mezclan/muestran incorrectamente. Productos con URL muestran imagen de otro producto. En carrito productos con URL muestran error 404 | Alto | CORREGIDO |
 | 2 |          |             |           |        |
 | 3 |          |             |           |        |
 
