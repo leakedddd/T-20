@@ -99,21 +99,41 @@ class CreateTicketActivity : AppCompatActivity() {
 
     private fun loadOrders() {
         lifecycleScope.launch {
-            val orders = withContext(Dispatchers.IO) { db.orderDao().getOrdersByUser(userId) }
-
             orderLabels.clear()
             orderIds.clear()
 
             orderLabels.add(getString(R.string.ticket_select_order))
             orderIds.add(-1)
 
-            if (orders.isEmpty()) {
-                Toast.makeText(this@CreateTicketActivity, getString(R.string.ticket_no_orders), Toast.LENGTH_LONG).show()
+            // Cargar desde Firebase primero
+            val firebaseOrders = if (userEmail != null) {
+                withContext(Dispatchers.IO) {
+                    try {
+                        firebaseRepo.getOrders(userEmail!!)
+                    } catch (e: Exception) {
+                        emptyList()
+                    }
+                }
             } else {
-                orders.forEach { orderWithItems ->
-                    val order = orderWithItems.order
+                emptyList()
+            }
+
+            if (firebaseOrders.isNotEmpty()) {
+                firebaseOrders.forEach { (order, _) ->
                     orderLabels.add(getString(R.string.ticket_order_item, order.id, order.total))
                     orderIds.add(order.id)
+                }
+            } else {
+                // Fallback a Room local si no hay en Firebase
+                val localOrders = withContext(Dispatchers.IO) { db.orderDao().getOrdersByUser(userId) }
+                if (localOrders.isEmpty()) {
+                    Toast.makeText(this@CreateTicketActivity, getString(R.string.ticket_no_orders), Toast.LENGTH_LONG).show()
+                } else {
+                    localOrders.forEach { orderWithItems ->
+                        val order = orderWithItems.order
+                        orderLabels.add(getString(R.string.ticket_order_item, order.id, order.total))
+                        orderIds.add(order.id)
+                    }
                 }
             }
 
