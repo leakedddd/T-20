@@ -37,7 +37,7 @@ class ProductAdapter(
                         listener(
                             onSuccess = { _, result ->
                                 if (imgProduct.tag == productId) {
-                                    imgProduct.setImageDrawable(result.image)
+                                    imgProduct.setImageDrawable(result.drawable)
                                 }
                             }
                         )

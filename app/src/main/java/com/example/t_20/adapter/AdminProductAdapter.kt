@@ -41,7 +41,7 @@ class AdminProductAdapter(
                             onSuccess = { _, result ->
                                 // Verificar que el tag siga siendo el mismo producto
                                 if (imgProduct.tag == productId) {
-                                    imgProduct.setImageDrawable(result.image)
+                                    imgProduct.setImageDrawable(result.drawable)
                                 }
                             }
                         )

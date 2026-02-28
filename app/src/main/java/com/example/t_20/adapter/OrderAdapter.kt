@@ -62,7 +62,7 @@ class OrderAdapter(
                             listener(
                                 onSuccess = { _, result ->
                                     if (imageView.tag == productId) {
-                                        imageView.setImageDrawable(result.image)
+                                        imageView.setImageDrawable(result.drawable)
                                     }
                                 }
                             )

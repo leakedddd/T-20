@@ -42,7 +42,7 @@ class CartAdapter(
                         listener(
                             onSuccess = { _, result ->
                                 if (imgCartProduct.tag == productId) {
-                                    imgCartProduct.setImageDrawable(result.image)
+                                    imgCartProduct.setImageDrawable(result.drawable)
                                 }
                             }
                         )

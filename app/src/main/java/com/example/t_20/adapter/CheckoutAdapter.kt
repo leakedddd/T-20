@@ -35,7 +35,7 @@ class CheckoutAdapter(
                     listener(
                         onSuccess = { _, result ->
                             if (binding.imgCheckoutProduct.tag == productId) {
-                                binding.imgCheckoutProduct.setImageDrawable(result.image)
+                                binding.imgCheckoutProduct.setImageDrawable(result.drawable)
                             }
                         }
                     )
