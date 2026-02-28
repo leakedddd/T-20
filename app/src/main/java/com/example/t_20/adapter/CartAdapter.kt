@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
+import coil.dispose
 import coil.load
 import coil.request.CachePolicy
 import com.example.t_20.R
@@ -27,14 +28,24 @@ class CartAdapter(
             val cartItem = item.cartItem
 
             binding.apply {
-                // Limpiar imagen anterior para evitar caché incorrecta
+                // Cancelar cualquier carga pendiente y limpiar
+                imgCartProduct.dispose()
                 imgCartProduct.setImageDrawable(null)
+                imgCartProduct.tag = product.id
 
                 if (!product.imageUrl.isNullOrEmpty()) {
+                    val productId = product.id
                     imgCartProduct.load(product.imageUrl) {
                         placeholder(R.drawable.error404)
                         error(R.drawable.error404)
                         memoryCachePolicy(CachePolicy.DISABLED)
+                        listener(
+                            onSuccess = { _, result ->
+                                if (imgCartProduct.tag == productId) {
+                                    imgCartProduct.setImageDrawable(result.image)
+                                }
+                            }
+                        )
                     }
                 } else {
                     val imageRes = if (ImageHelper.isValidResourceId(root.context, product.imageRes)) {

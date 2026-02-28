@@ -3,6 +3,7 @@ package com.example.t_20.adapter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import coil.dispose
 import coil.load
 import coil.request.CachePolicy
 import com.example.t_20.R
@@ -22,17 +23,26 @@ class ProductAdapter(
 
         fun bind(product: Product) {
             binding.apply {
-                // Limpiar imagen anterior para evitar caché incorrecta
+                // Cancelar cualquier carga pendiente y limpiar
+                imgProduct.dispose()
                 imgProduct.setImageDrawable(null)
+                imgProduct.tag = product.id
 
                 if (!product.imageUrl.isNullOrEmpty()) {
+                    val productId = product.id
                     imgProduct.load(product.imageUrl) {
                         placeholder(R.drawable.error404)
                         error(R.drawable.error404)
                         memoryCachePolicy(CachePolicy.DISABLED)
+                        listener(
+                            onSuccess = { _, result ->
+                                if (imgProduct.tag == productId) {
+                                    imgProduct.setImageDrawable(result.image)
+                                }
+                            }
+                        )
                     }
                 } else {
-                    // Usar ImageHelper para obtener el drawable correcto por nombre
                     val imageRes = if (ImageHelper.isValidResourceId(root.context, product.imageRes)) {
                         product.imageRes
                     } else {

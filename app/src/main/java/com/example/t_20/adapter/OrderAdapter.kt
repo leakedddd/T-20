@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.recyclerview.widget.RecyclerView
+import coil.dispose
 import coil.load
 import coil.request.CachePolicy
 import com.example.t_20.R
@@ -51,11 +52,20 @@ class OrderAdapter(
                         clipToOutline = true
                     }
 
+                    imageView.tag = item.productId
                     if (!item.productImageUrl.isNullOrEmpty()) {
+                        val productId = item.productId
                         imageView.load(item.productImageUrl) {
                             placeholder(R.drawable.error404)
                             error(R.drawable.error404)
                             memoryCachePolicy(CachePolicy.DISABLED)
+                            listener(
+                                onSuccess = { _, result ->
+                                    if (imageView.tag == productId) {
+                                        imageView.setImageDrawable(result.image)
+                                    }
+                                }
+                            )
                         }
                     } else {
                         val imageRes = if (ImageHelper.isValidResourceId(root.context, item.productImageRes)) {

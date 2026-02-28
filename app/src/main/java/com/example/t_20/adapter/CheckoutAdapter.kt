@@ -3,6 +3,7 @@ package com.example.t_20.adapter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import coil.dispose
 import coil.load
 import coil.request.CachePolicy
 import com.example.t_20.R
@@ -20,14 +21,24 @@ class CheckoutAdapter(
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(item: CartWithProduct) {
-            // Limpiar imagen anterior para evitar caché incorrecta
+            // Cancelar cualquier carga pendiente y limpiar
+            binding.imgCheckoutProduct.dispose()
             binding.imgCheckoutProduct.setImageDrawable(null)
+            binding.imgCheckoutProduct.tag = item.product.id
 
             if (!item.product.imageUrl.isNullOrEmpty()) {
+                val productId = item.product.id
                 binding.imgCheckoutProduct.load(item.product.imageUrl) {
                     placeholder(R.drawable.error404)
                     error(R.drawable.error404)
                     memoryCachePolicy(CachePolicy.DISABLED)
+                    listener(
+                        onSuccess = { _, result ->
+                            if (binding.imgCheckoutProduct.tag == productId) {
+                                binding.imgCheckoutProduct.setImageDrawable(result.image)
+                            }
+                        }
+                    )
                 }
             } else {
                 val imageRes = if (ImageHelper.isValidResourceId(binding.root.context, item.product.imageRes)) {
