@@ -195,7 +195,7 @@
 | # | Pantalla | Descripción | Severidad | Estado |
 |---|----------|-------------|-----------|--------|
 | 1 | Admin Panel, Cart | Imágenes de productos se mezclan/muestran incorrectamente. Productos con URL muestran imagen de otro producto. En carrito productos con URL muestran error 404 | Alto | CORREGIDO |
-| 2 |          |             |           |        |
+| 2 | Catálogo, Admin | Productos creados en Firebase no aparecen en la app. Solo sincronizaba hacia Firebase, no descargaba productos nuevos | Alto | CORREGIDO |
 | 3 |          |             |           |        |
 
 **Severidad:** Crítico / Alto / Medio / Bajo
