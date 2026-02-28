@@ -93,10 +93,39 @@ class AdminActivity : AppCompatActivity() {
     }
 
     private fun loadProducts() {
-        Executors.newSingleThreadExecutor().execute {
-            val products = db.productDao().getAll()
-            allProducts = products
-            runOnUiThread {
+        lifecycleScope.launch {
+            try {
+                // First sync from Firebase
+                val firebaseProducts = withContext(Dispatchers.IO) {
+                    firebaseRepo.getProducts()
+                }
+                if (firebaseProducts.isNotEmpty()) {
+                    withContext(Dispatchers.IO) {
+                        db.productDao().upsertAll(firebaseProducts)
+                    }
+                }
+
+                // Then load all products
+                val products = withContext(Dispatchers.IO) {
+                    db.productDao().getAll()
+                }
+                allProducts = products
+
+                if (products.isEmpty()) {
+                    binding.txtEmpty.visibility = View.VISIBLE
+                    binding.recyclerProducts.visibility = View.GONE
+                } else {
+                    binding.txtEmpty.visibility = View.GONE
+                    binding.recyclerProducts.visibility = View.VISIBLE
+                    adapter.updateProducts(products)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                // Fallback: load only local products
+                val products = withContext(Dispatchers.IO) {
+                    db.productDao().getAll()
+                }
+                allProducts = products
                 if (products.isEmpty()) {
                     binding.txtEmpty.visibility = View.VISIBLE
                     binding.recyclerProducts.visibility = View.GONE

@@ -45,12 +45,21 @@ class MainActivity : AppCompatActivity() {
             loadFragment(homeFragment)
         }
 
-        // Sync products to Firebase
+        // Sync products with Firebase (bidirectional)
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val db = AppDatabase.getInstance(this@MainActivity)
-                val products = db.productDao().getAll()
-                FirebaseRepository().syncProducts(products)
+                val firebaseRepo = FirebaseRepository()
+
+                // 1. Download products from Firebase and insert/update locally
+                val firebaseProducts = firebaseRepo.getProducts()
+                if (firebaseProducts.isNotEmpty()) {
+                    db.productDao().upsertAll(firebaseProducts)
+                }
+
+                // 2. Upload local products to Firebase
+                val localProducts = db.productDao().getAll()
+                firebaseRepo.syncProducts(localProducts)
             } catch (e: Exception) {
                 e.printStackTrace()
             }

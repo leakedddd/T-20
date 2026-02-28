@@ -3,6 +3,7 @@ package com.example.t_20.data
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.example.t_20.model.Product
@@ -33,6 +34,12 @@ interface ProductDao {
 
     @Insert
     fun insert(product: Product): Long
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun upsert(product: Product)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun upsertAll(products: List<Product>)
 
     @Update
     fun update(product: Product)
