@@ -100,8 +100,10 @@ class AccountFragment : Fragment() {
 
     private fun loadOrders(userEmail: String) {
         if (userEmail.isEmpty()) {
-            binding.txtNoOrders.visibility = View.VISIBLE
-            binding.recyclerOrders.visibility = View.GONE
+            _binding?.let { binding ->
+                binding.txtNoOrders.visibility = View.VISIBLE
+                binding.recyclerOrders.visibility = View.GONE
+            }
             return
         }
 
@@ -110,18 +112,22 @@ class AccountFragment : Fragment() {
                 val ordersWithItems = withContext(Dispatchers.IO) {
                     firebaseRepo.getOrders(userEmail)
                 }
-                if (ordersWithItems.isEmpty()) {
-                    binding.txtNoOrders.visibility = View.VISIBLE
-                    binding.recyclerOrders.visibility = View.GONE
-                } else {
-                    binding.txtNoOrders.visibility = View.GONE
-                    binding.recyclerOrders.visibility = View.VISIBLE
-                    val orders = ordersWithItems.map { OrderWithItems(it.first, it.second) }
-                    orderAdapter.updateOrders(orders)
+                _binding?.let { binding ->
+                    if (ordersWithItems.isEmpty()) {
+                        binding.txtNoOrders.visibility = View.VISIBLE
+                        binding.recyclerOrders.visibility = View.GONE
+                    } else {
+                        binding.txtNoOrders.visibility = View.GONE
+                        binding.recyclerOrders.visibility = View.VISIBLE
+                        val orders = ordersWithItems.map { OrderWithItems(it.first, it.second) }
+                        orderAdapter.updateOrders(orders)
+                    }
                 }
             } catch (e: Exception) {
-                binding.txtNoOrders.visibility = View.VISIBLE
-                binding.recyclerOrders.visibility = View.GONE
+                _binding?.let { binding ->
+                    binding.txtNoOrders.visibility = View.VISIBLE
+                    binding.recyclerOrders.visibility = View.GONE
+                }
             }
         }
     }
